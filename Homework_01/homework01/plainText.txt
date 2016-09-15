@@ -1,0 +1,2 @@
+This is a test file, the contents of which will be encrypted.
+Please note the !@#$%$# non-alphabetic characters!!

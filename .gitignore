@@ -1,6 +1,4 @@
 .metadata
 *.class
-*.classpath
 *.settings
-*.txt
 .recommenders
