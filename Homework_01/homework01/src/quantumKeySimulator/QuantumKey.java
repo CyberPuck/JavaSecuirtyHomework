@@ -121,19 +121,30 @@ public class QuantumKey {
 	 * returned array indicates which indices in the basis input array match the
 	 * key's.
 	 * 
-	 * @param basis
+	 * @param inputBasis
 	 *            input basis set
 	 * @return boolean array indicating which basis match
 	 */
-	public boolean[] compareBasis(QuantumBasis[] basis) {
+	public boolean[] compareBasis(QuantumBasis[] inputBasis) {
 		boolean[] validBasis = new boolean[basisSet.length];
 		for (int i = 0; i < basisSet.length; i++) {
-			if (basis[i].equals(basisSet[i]))
+			if (inputBasis[i].equals(basisSet[i]))
 				validBasis[i] = true;
 			else
 				validBasis[i] = false;
 		}
 		return validBasis;
+	}
+	
+	public boolean[] compareKey(int[] inputKey) {
+		boolean[] validBits = new boolean[key.length];
+		for (int i = 0; i < key.length; i++) {
+			if (inputKey[i] == key[i])
+				validBits[i] = true;
+			else
+				validBits[i] = false;
+		}
+		return validBits;
 	}
 
 	/**

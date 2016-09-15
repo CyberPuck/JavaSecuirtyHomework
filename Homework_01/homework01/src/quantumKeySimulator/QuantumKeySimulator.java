@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class QuantumKeySimulator {
 
 	public static void main(String[] args) {
-		int key_length = 9;
+		int key_length = 20;
 		// Simple simulation
 		QuantumKey aliceKey = new QuantumKey(key_length);
 		QuantumKey bobKey = new QuantumKey(key_length);
@@ -31,6 +31,7 @@ public class QuantumKeySimulator {
 		System.out.println(bobKey.toString());
 		compare = aliceKey.compareBasis(bobKey.getBasisSet());
 		System.out.println(Arrays.toString(compare));
+		System.out.println(Arrays.toString(aliceKey.compareKey(bobKey.getKey())));
 	}
 
 }
