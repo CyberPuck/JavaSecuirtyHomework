@@ -2,11 +2,12 @@ package oneTimePadCipher;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import utilities.Utilities;
+import utilities.FileIO;
 
 public class OneTimePadCipher {
 
@@ -19,9 +20,9 @@ public class OneTimePadCipher {
 		File plainTextFile = new File(args[0]);
 		// try to read in the file
 		try {
-			String originalPlainText = Utilities.readFile(plainTextFile);
+			String originalPlainText = FileIO.readFile(plainTextFile);
 			// generate the secure random number generator
-			SecureRandom rng = new SecureRandom();
+			SecureRandom rng = SecureRandom.getInstance("SHA1PRNG");
 			// convert string to byte array
 			byte[] originalPlainByteArray = originalPlainText.getBytes();
 			// ensure the key length matches the plain text
@@ -35,8 +36,8 @@ public class OneTimePadCipher {
 			// print out results
 			Logger logger = Logger.getLogger(OneTimePadCipher.class.getName());
 			logger.log(Level.INFO, "---KEY---");
-			logger.log(Level.INFO, key.toString());
-			logger.log(Level.INFO, "---Plain Text---");
+			logger.log(Level.INFO, byteArrayToString(key));
+			logger.log(Level.INFO, "---Original Plain Text---");
 			logger.log(Level.INFO, originalPlainText);
 			logger.log(Level.INFO, "---Cipher Text---");
 			logger.log(Level.INFO, new String(cipherTextArray));
@@ -44,6 +45,8 @@ public class OneTimePadCipher {
 			logger.log(Level.INFO, new String(plainTextArray));
 		} catch (IOException e) {
 			System.err.println("Error reading the file: " + e.getMessage());
+		} catch (NoSuchAlgorithmException err) {
+			System.err.println("Error getting ScureRandom algorithm");
 		}
 	}
 
@@ -81,5 +84,29 @@ public class OneTimePadCipher {
 			plainText[i] = (byte) (cipherText[i] ^ key[i]);
 		}
 		return plainText;
+	}
+
+	/**
+	 * Converts a byte array to a string of binary data.
+	 * 
+	 * @param array
+	 *            byte array to convert
+	 * @return binary represented string of byte array
+	 */
+	private static String byteArrayToString(byte[] array) {
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < array.length; i++) {
+			int temp = array[i];
+			String data = String.format("%8s", Integer.toBinaryString(temp)).replace(' ', '0');
+			if(data.length() > 8) {
+				// handling java and its integer crazyness
+				data = data.substring(data.length()-8, data.length());
+			}
+			builder.append(data);
+			if(i % 8 == 0 && i != 0) {
+				builder.append("\n");
+			}
+		}
+		return builder.toString();
 	}
 }

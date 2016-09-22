@@ -37,8 +37,7 @@ public class CommandLineArgs {
 	public boolean parseCommandLineArgs(String[] args) {
 		boolean returnValue = true;
 		if (args.length != EXPECTED_NUMBER_OF_ARGS) {
-			System.err
-					.println("Expeceted 4 arguments, received: " + args.length);
+			System.err.println("Expeceted 4 arguments, received: " + args.length);
 			returnValue = false;
 		} else {
 			// parse the mode
@@ -47,16 +46,19 @@ public class CommandLineArgs {
 			} else if (args[0].equals("d")) {
 				mode = EncryptionMode.DECRYPT;
 			} else {
-				System.err.println(
-						"The first argument must be an 'e' or 'd', got: "
-								+ args[0]);
+				System.err.println("The first argument must be an 'e' or 'd', got: " + args[0]);
 				returnValue = false;
 			}
 
 			// add in the paths
 			keyPath = args[1];
-			plainTextPath = args[2];
-			cipherTextPath = args[3];
+			if (mode.equals(EncryptionMode.ENCRYPT)) {
+				plainTextPath = args[2];
+				cipherTextPath = args[3];
+			} else {
+				plainTextPath = args[3];
+				cipherTextPath = args[2];
+			}
 		}
 
 		// print help if a parsing error occurred
@@ -68,19 +70,14 @@ public class CommandLineArgs {
 
 	private static void printHelp() {
 		System.out.println("\n\nSubstitutionCipher  ");
-		System.out.println(
-				"This application requires 4 command line arguements.");
-		System.out.println(
-				"Expected format:  java substitutionCipher <mode> <key> <plain text> <cipher text>.");
-		System.out.println(
-				"Example: java substitutionCipher e ./key ./plainText ./cipherText.");
-		System.out.println(
-				"<mode>:        Either an 'e' (encryption) or 'd' (decryption).");
+		System.out.println("This application requires 4 command line arguements.");
+		System.out.println("Expected format:  java substitutionCipher <mode> <key> <plain text> <cipher text>.");
+		System.out.println("Example: java substitutionCipher e ./key ./plainText ./cipherText.");
+		System.out.println("<mode>:        Either an 'e' (encryption) or 'd' (decryption).");
 		System.out.println("<key>:         Path to the key file.");
 		System.out.println("<plain text>:  Path to plain text file.");
 		System.out.println("<cipher text>: Path to cipher text file.\n");
-		System.out.println(
-				"NOTE:  <plain text> and <cipher text> change order in decryption mode");
+		System.out.println("NOTE:  <plain text> and <cipher text> change order in decryption mode");
 		System.out.println("NOTE:  Paths can be relative or absolute");
 	}
 

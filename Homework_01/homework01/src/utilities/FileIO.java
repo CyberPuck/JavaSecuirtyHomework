@@ -8,11 +8,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 /**
- * Random utilities for homework01.
+ * File input/output utilities for homework01.
  * 
  * @author Cyber_Puck
  */
-public class Utilities {
+public class FileIO {
 
 	/**
 	 * Reads in a file and returns the string.

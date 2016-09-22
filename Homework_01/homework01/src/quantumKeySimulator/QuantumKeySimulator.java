@@ -1,7 +1,5 @@
 package quantumKeySimulator;
 
-import java.util.Arrays;
-
 public class QuantumKeySimulator {
 
 	public static void main(String[] args) {
@@ -11,27 +9,29 @@ public class QuantumKeySimulator {
 		QuantumKey bobKey = new QuantumKey(key_length);
 		// Alice generates a key
 		aliceKey.generateKey();
+		System.out.println("---Alice---");
 		System.out.println(aliceKey.toString());
 		// Bob generates a key
 		bobKey.measureKey(aliceKey.getPhotonPolarization());
+		System.out.println("---Bob---");
 		System.out.println(bobKey.toString());
-		boolean[] compare = aliceKey.compareBasis(bobKey.getBasisSet());
-		System.out.println(Arrays.toString(compare));
+		System.out.println(aliceKey.compareBasis(bobKey.getBasisSet()));
 
 		// simulating Eve trying to listen
-		System.out.println("\nEVE IS HERE!!!!!! :(");
-		QuantumKey eveKey = new QuantumKey(key_length);
-		aliceKey.generateKey();
-		System.out.println(aliceKey.toString());
-		// Eve generates a key
-		eveKey.measureKey(aliceKey.getPhotonPolarization());
-		System.out.println(eveKey.toString());
-		// Bob generates a key
-		bobKey.measureKey(eveKey.getPhotonPolarization());
-		System.out.println(bobKey.toString());
-		compare = aliceKey.compareBasis(bobKey.getBasisSet());
-		System.out.println(Arrays.toString(compare));
-		System.out.println(Arrays.toString(aliceKey.compareKey(bobKey.getKey())));
+		 System.out.println("---Alice---");
+		 QuantumKey eveKey = new QuantumKey(key_length);
+		 aliceKey.generateKey();
+		 System.out.println(aliceKey.toString());
+		 // Eve generates a key
+		 eveKey.measureKey(aliceKey.getPhotonPolarization());
+		 System.out.println("---Eve---");
+		 System.out.println(eveKey.toString());
+		 // Bob generates a key
+		 bobKey.measureKey(eveKey.getPhotonPolarization());
+		 System.out.println("---Bob---");
+		 System.out.println(bobKey.toString());
+		 System.out.println(bobKey.compareBasis(aliceKey.getBasisSet()));
+		 System.out.println(aliceKey.compareKey(bobKey.getKey(), bobKey.getBasisSet()));
 	}
 
 }

@@ -1,7 +1,7 @@
 package quantumKeySimulator;
 
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 
 /**
  * Represents a quantum key. This includes the bits and filters used.
@@ -33,9 +33,13 @@ public class QuantumKey {
 		key = new int[keyLength];
 		basisSet = new QuantumBasis[keyLength];
 		photonPolarization = new Polarization[keyLength];
-
 		// start up the RNG
-		rng = new SecureRandom();
+		try {
+			rng = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println("Can't use SHA1PRNG");
+			rng = new SecureRandom();
+		}
 	}
 
 	/**
@@ -66,8 +70,7 @@ public class QuantumKey {
 	 */
 	public void measureKey(Polarization[] sentPolarizations) {
 		if (sentPolarizations.length != key.length) {
-			System.err.println(
-					"Polarization array and key array lengths don't match");
+			System.err.println("Polarization array and key array lengths don't match");
 			return;
 		}
 
@@ -80,7 +83,7 @@ public class QuantumKey {
 				if (basisSet[i] == QuantumBasis.RECTILINEAR)
 					key[i] = 0;
 				else
-					key[i] = 1;
+					key[i] = 0;
 				break;
 			case HORIZONTAL:
 				if (basisSet[i] == QuantumBasis.RECTILINEAR)
@@ -92,7 +95,7 @@ public class QuantumKey {
 				if (basisSet[i] == QuantumBasis.DIAGONAL)
 					key[i] = 0;
 				else
-					key[i] = 1;
+					key[i] = 0;
 				break;
 			case DIAGONAL_DOWN:
 				if (basisSet[i] == QuantumBasis.DIAGONAL)
@@ -104,9 +107,10 @@ public class QuantumKey {
 				System.err.println("Unknown polarization!");
 				return;
 			}
-			// based on key value and basis calculate the polarization
-			// Needed for testing Eve
-			if (basisSet[i].equals(QuantumBasis.RECTILINEAR)) {
+			// randomly select basis, based on key select valid polarization
+			// Needed for Eve
+			QuantumBasis randomBasis = QuantumBasis.values()[rng.nextBoolean() ? 1 : 0];
+			if (randomBasis.equals(QuantumBasis.RECTILINEAR)) {
 				// positions 0 and 1 correspond to the binary value of the basis
 				photonPolarization[i] = Polarization.values()[key[i]];
 			} else {
@@ -123,28 +127,41 @@ public class QuantumKey {
 	 * 
 	 * @param inputBasis
 	 *            input basis set
-	 * @return boolean array indicating which basis match
+	 * @return String indicating if Basis match
 	 */
-	public boolean[] compareBasis(QuantumBasis[] inputBasis) {
-		boolean[] validBasis = new boolean[basisSet.length];
+	public String compareBasis(QuantumBasis[] inputBasis) {
+		StringBuilder builder = new StringBuilder("Compare:");
 		for (int i = 0; i < basisSet.length; i++) {
 			if (inputBasis[i].equals(basisSet[i]))
-				validBasis[i] = true;
+				builder.append(key[i] + ", ");
 			else
-				validBasis[i] = false;
+				builder.append("-, ");
 		}
-		return validBasis;
+		return builder.toString();
 	}
-	
-	public boolean[] compareKey(int[] inputKey) {
-		boolean[] validBits = new boolean[key.length];
+
+	/**
+	 * Compare keys to see if the bit values match. An error only occurs if the
+	 * basis match but the bits do not.
+	 * 
+	 * @param inputKey
+	 *            input binary key
+	 * @return String indicating bit errors
+	 */
+	public String compareKey(int[] inputKey, QuantumBasis[] inputBasis) {
+		StringBuilder builder = new StringBuilder("Errors: ");
 		for (int i = 0; i < key.length; i++) {
-			if (inputKey[i] == key[i])
-				validBits[i] = true;
-			else
-				validBits[i] = false;
+			if (inputBasis[i].equals(basisSet[i])) {
+				if (inputKey[i] != key[i]) {
+					builder.append("E, "); // Eve error
+				} else {
+					builder.append("-, ");
+				}
+			} else {
+				builder.append("-, "); // not considered
+			}
 		}
-		return validBits;
+		return builder.toString();
 	}
 
 	/**
@@ -176,8 +193,43 @@ public class QuantumKey {
 
 	@Override
 	public String toString() {
-		return "QuantumKey [key=" + Arrays.toString(key) + ",\nbasisSet="
-				+ Arrays.toString(basisSet) + ",\nphotonPolarization="
-				+ Arrays.toString(photonPolarization) + "]";
+		StringBuilder stringBuilder = new StringBuilder("QuantumKey:\n");
+		// add in the key
+		stringBuilder.append("Key:    ");
+		for (int i : key) {
+			if (i < 0) {
+				stringBuilder.append("-, ");
+				continue;
+			}
+			stringBuilder.append(i + ", ");
+		}
+		// add in basis polarization
+		stringBuilder.append("\nBasis:  ");
+		for (QuantumBasis basis : this.basisSet) {
+			if (basis.equals(QuantumBasis.RECTILINEAR)) {
+				stringBuilder.append("+, ");
+			} else {
+				stringBuilder.append("X, ");
+			}
+		}
+		// add in polarization filters
+		stringBuilder.append("\nPhotons:");
+		for (Polarization polarization : this.photonPolarization) {
+			if (polarization == null) {
+				stringBuilder.append("., ");
+			} else if (polarization.equals(Polarization.VERTICAL)) {
+				stringBuilder.append("|, ");
+			} else if (polarization.equals(Polarization.HORIZONTAL)) {
+				stringBuilder.append("-, ");
+			} else if (polarization.equals(Polarization.DIAGONAL_UP)) {
+				stringBuilder.append("/, ");
+			} else {
+				stringBuilder.append("\\, ");
+			}
+		}
+		return stringBuilder.toString();
+		// return "QuantumKey [key=" + Arrays.toString(key) + ",\nbasisSet="
+		// + Arrays.toString(basisSet) + ",\nphotonPolarization="
+		// + Arrays.toString(photonPolarization) + "]";
 	}
 }

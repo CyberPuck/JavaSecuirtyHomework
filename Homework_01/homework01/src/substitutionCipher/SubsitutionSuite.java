@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import utilities.Utilities;
+import utilities.FileIO;
 
 /**
  * Handles the encryption and decryption based on a provided key.
@@ -34,8 +34,8 @@ public class SubsitutionSuite {
 
 		if (verifyFiles(keyFile, plainTextFile, cipherTextFile)) {
 			try {
-				String key = Utilities.readFile(keyFile);
-				String plainText = Utilities.readFile(plainTextFile);
+				String key = FileIO.readFile(keyFile);
+				String plainText = FileIO.readFile(plainTextFile);
 				// set all text to upper case, just in case
 				plainText = plainText.toUpperCase();
 				StringBuilder cipherTextBuilder = new StringBuilder();
@@ -62,7 +62,7 @@ public class SubsitutionSuite {
 				logger.log(Level.INFO, cipherTextBuilder.toString());
 
 				// write the cipher text to file
-				Utilities.writeFile(cipherTextFile, cipherTextBuilder.toString());
+				FileIO.writeFile(cipherTextFile, cipherTextBuilder.toString());
 
 			} catch (IOException e) {
 				System.err.println(
@@ -95,8 +95,8 @@ public class SubsitutionSuite {
 
 		if (verifyFiles(keyFile, cipherTextFile, plainTextFile)) {
 			try {
-				String key = Utilities.readFile(keyFile);
-				String cipherText = Utilities.readFile(cipherTextFile);
+				String key = FileIO.readFile(keyFile);
+				String cipherText = FileIO.readFile(cipherTextFile);
 				// set all text to upper case, just in case
 				cipherText = cipherText.toUpperCase();
 				StringBuilder plainTextBuilder = new StringBuilder();
@@ -122,7 +122,7 @@ public class SubsitutionSuite {
 				logger.log(Level.INFO, "---PLAIN TEXT---");
 				logger.log(Level.INFO, plainTextBuilder.toString());
 				// write the plain text to file
-				Utilities.writeFile(plainTextFile, plainTextBuilder.toString());
+				FileIO.writeFile(plainTextFile, plainTextBuilder.toString());
 
 			} catch (IOException e) {
 				System.err.println(
