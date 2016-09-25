@@ -1,5 +1,6 @@
 package classLoaders;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -18,7 +19,7 @@ public class MyCustomClassLoader extends URLClassLoader {
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		// TODO Auto-generated method stub
 		byte[] b = loadMyClassData(name);
-		return (b == null) ? null : defineClass(name, b, 0, b.length);
+		return (b == null) ? null : defineClass("TestClass", b, 0, b.length);
 	}
 
 	/**
@@ -31,7 +32,6 @@ public class MyCustomClassLoader extends URLClassLoader {
 		if(!name.isEmpty()) {
 			// try to read in the file
 			Path path = Paths.get(name);
-			Path abs = path.toAbsolutePath();
 			try {
 				return Files.readAllBytes(path);
 			} catch (IOException e) {
