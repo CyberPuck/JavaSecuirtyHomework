@@ -1,6 +1,5 @@
 package classLoaders;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -12,7 +11,6 @@ public class MyCustomClassLoader extends URLClassLoader {
 
 	public MyCustomClassLoader(URL[] urls) {
 		super(urls);
-		System.out.println("Let URLClassLoader handle construction");
 	}
 	
 	@Override
