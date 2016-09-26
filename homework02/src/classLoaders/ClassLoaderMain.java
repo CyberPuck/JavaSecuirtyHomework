@@ -3,6 +3,11 @@ package classLoaders;
 import java.io.IOException;
 import java.net.URL;
 
+/**
+ * Tests HW02 Part 1.
+ * 
+ * @author Kyle
+ */
 public class ClassLoaderMain {
 
 	public static void main(String[] args) {
