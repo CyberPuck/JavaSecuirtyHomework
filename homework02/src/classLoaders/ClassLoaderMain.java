@@ -22,13 +22,13 @@ public class ClassLoaderMain {
 			Object object1 = test.newInstance();
 			Object object2 = test.newInstance();
 			System.out
-					.println("TestClass: " + test.hashCode() + " loaded by MyCustomeClassLoader: " + loader.hashCode());
+					.println("TestClass: " + test.hashCode() + " loaded by MyCustomClassLoader: " + loader.hashCode());
 			System.out
-					.println("TestClass: " + test.hashCode() + " loaded by MyCustomeClassLoader: " + loader.hashCode());
+					.println("TestClass: " + test.hashCode() + " loaded by MyCustomClassLoader: " + loader.hashCode());
 			System.out.println(
-					"TestClass: " + object1.hashCode() + " loaded by MyCustomeClassLoader: " + loader.hashCode());
+					"TestClass: " + object1.hashCode() + " loaded by MyCustomClassLoader: " + loader.hashCode());
 			System.out.println(
-					"TestClass: " + object2.hashCode() + " loaded by MyCustomeClassLoader: " + loader.hashCode());
+					"TestClass: " + object2.hashCode() + " loaded by MyCustomClassLoader: " + loader.hashCode());
 			if (object2.equals(object1)) {
 				System.out.println("Objects are equal");
 			} else {
@@ -50,13 +50,13 @@ public class ClassLoaderMain {
 			Object object1 = test1.newInstance();
 			Object object2 = test2.newInstance();
 			System.out.println(
-					"TestClass: " + test1.hashCode() + " loaded by MyCustomeClassLoader: " + loader1.hashCode());
+					"TestClass: " + test1.hashCode() + " loaded by MyCustomClassLoader: " + loader1.hashCode());
 			System.out.println(
-					"TestClass: " + test2.hashCode() + " loaded by MyCustomeClassLoader: " + loader2.hashCode());
+					"TestClass: " + test2.hashCode() + " loaded by MyCustomClassLoader: " + loader2.hashCode());
 			System.out.println(
-					"TestClass: " + object1.hashCode() + " loaded by MyCustomeClassLoader: " + loader1.hashCode());
+					"TestClass: " + object1.hashCode() + " loaded by MyCustomClassLoader: " + loader1.hashCode());
 			System.out.println(
-					"TestClass: " + object2.hashCode() + " loaded by MyCustomeClassLoader: " + loader2.hashCode());
+					"TestClass: " + object2.hashCode() + " loaded by MyCustomClassLoader: " + loader2.hashCode());
 			if (object1.equals(object2)) {
 				System.out.println("Objects are equal");
 			} else {
