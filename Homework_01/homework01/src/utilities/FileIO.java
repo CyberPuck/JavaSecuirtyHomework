@@ -49,8 +49,7 @@ public class FileIO {
 	 * @throws IOException
 	 *             If an error occurred during writing an exception is thrown
 	 */
-	public static void writeFile(File file, String fileContents)
-			throws IOException {
+	public static void writeFile(File file, String fileContents) throws IOException {
 		// try-with-resources, no need to close out the fle
 		try (BufferedWriter wr = new BufferedWriter(new FileWriter(file))) {
 			wr.write(fileContents);

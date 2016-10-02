@@ -98,12 +98,12 @@ public class OneTimePadCipher {
 		for (int i = 0; i < array.length; i++) {
 			int temp = array[i];
 			String data = String.format("%8s", Integer.toBinaryString(temp)).replace(' ', '0');
-			if(data.length() > 8) {
+			if (data.length() > 8) {
 				// handling java and its integer crazyness
-				data = data.substring(data.length()-8, data.length());
+				data = data.substring(data.length() - 8, data.length());
 			}
 			builder.append(data);
-			if(i % 8 == 0 && i != 0) {
+			if (i % 8 == 0 && i != 0) {
 				builder.append("\n");
 			}
 		}

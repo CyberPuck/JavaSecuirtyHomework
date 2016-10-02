@@ -26,8 +26,7 @@ public class SubsitutionSuite {
 	 *            path to the cipher text file to be overwritten
 	 * @return flag indicating if an error occurred during encryption
 	 */
-	public static boolean encrypt(String keyPath, String plainTextPath,
-			String cipherTextPath) {
+	public static boolean encrypt(String keyPath, String plainTextPath, String cipherTextPath) {
 		File keyFile = new File(keyPath);
 		File plainTextFile = new File(plainTextPath);
 		File cipherTextFile = new File(cipherTextPath);
@@ -52,8 +51,7 @@ public class SubsitutionSuite {
 				}
 
 				// log out the results
-				Logger logger = Logger
-						.getLogger(SubsitutionSuite.class.getName());
+				Logger logger = Logger.getLogger(SubsitutionSuite.class.getName());
 				logger.log(Level.INFO, "---KEY---");
 				logger.log(Level.INFO, key);
 				logger.log(Level.INFO, "---PLAIN TEXT---");
@@ -65,8 +63,7 @@ public class SubsitutionSuite {
 				FileIO.writeFile(cipherTextFile, cipherTextBuilder.toString());
 
 			} catch (IOException e) {
-				System.err.println(
-						"Error occured during file I/O: " + e.getMessage());
+				System.err.println("Error occured during file I/O: " + e.getMessage());
 				return false;
 			}
 		} else {
@@ -87,8 +84,7 @@ public class SubsitutionSuite {
 	 *            path to cipher text file
 	 * @return flag indicating if the operation was successful
 	 */
-	public static boolean decrypt(String keyPath, String plainTextPath,
-			String cipherTextPath) {
+	public static boolean decrypt(String keyPath, String plainTextPath, String cipherTextPath) {
 		File keyFile = new File(keyPath);
 		File plainTextFile = new File(plainTextPath);
 		File cipherTextFile = new File(cipherTextPath);
@@ -113,8 +109,7 @@ public class SubsitutionSuite {
 					plainTextBuilder.append(c);
 				}
 				// log out the results
-				Logger logger = Logger
-						.getLogger(SubsitutionSuite.class.getName());
+				Logger logger = Logger.getLogger(SubsitutionSuite.class.getName());
 				logger.log(Level.INFO, "---KEY---");
 				logger.log(Level.INFO, key);
 				logger.log(Level.INFO, "---CIPHER TEXT---");
@@ -125,8 +120,7 @@ public class SubsitutionSuite {
 				FileIO.writeFile(plainTextFile, plainTextBuilder.toString());
 
 			} catch (IOException e) {
-				System.err.println(
-						"Error occured during file I/O: " + e.getMessage());
+				System.err.println("Error occured during file I/O: " + e.getMessage());
 				return false;
 			}
 		} else {
@@ -145,8 +139,7 @@ public class SubsitutionSuite {
 	 * @param outputFile
 	 * @return
 	 */
-	private static boolean verifyFiles(File keyFile, File inputFile,
-			File outputFile) {
+	private static boolean verifyFiles(File keyFile, File inputFile, File outputFile) {
 		// check the files
 		if (!keyFile.exists()) {
 			System.err.println("Key file does not exist");

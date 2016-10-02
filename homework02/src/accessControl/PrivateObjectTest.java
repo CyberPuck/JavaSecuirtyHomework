@@ -25,7 +25,7 @@ public class PrivateObjectTest {
 		public void setX(int x) {
 			this.x = x;
 		}
-		
+
 		public void setTemp(Temp t, int newValue) {
 			t.setX(newValue);
 		}

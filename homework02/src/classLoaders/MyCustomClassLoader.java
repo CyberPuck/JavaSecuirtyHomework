@@ -12,7 +12,7 @@ public class MyCustomClassLoader extends URLClassLoader {
 	public MyCustomClassLoader(URL[] urls) {
 		super(urls);
 	}
-	
+
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		// TODO Auto-generated method stub
@@ -21,13 +21,15 @@ public class MyCustomClassLoader extends URLClassLoader {
 	}
 
 	/**
-	 * Given the string which represents the file location, read the file as binary
-	 * data for the class loader to define the class.
-	 * @param name of class to load
+	 * Given the string which represents the file location, read the file as
+	 * binary data for the class loader to define the class.
+	 * 
+	 * @param name
+	 *            of class to load
 	 * @return byte array of read in class or NULL if failed
 	 */
 	private byte[] loadMyClassData(String name) {
-		if(!name.isEmpty()) {
+		if (!name.isEmpty()) {
 			// try to read in the file
 			Path path = Paths.get(name);
 			try {
@@ -36,7 +38,7 @@ public class MyCustomClassLoader extends URLClassLoader {
 				// TODO Auto-generated catch block
 				System.err.println("Failed to read class file");
 			}
-		} 
+		}
 		// default returning null
 		return null;
 	}

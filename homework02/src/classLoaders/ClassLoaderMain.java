@@ -15,7 +15,7 @@ public class ClassLoaderMain {
 		// feeding in the relative location of the test class
 		String classLocation = "../DMZ/TestClass.class";
 		// if there is a command line arg use it as the path
-		if(args.length > 0) {
+		if (args.length > 0) {
 			classLocation = args[0];
 			System.out.println("File: " + classLocation);
 			System.out.println("PWD: " + Paths.get("").toAbsolutePath().toString());
