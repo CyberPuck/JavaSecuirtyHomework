@@ -36,17 +36,17 @@ public class AccessControlTester {
 		try {
 			System.out.println("Local class private fields");
 			ReflectionTester reflector = new ReflectionTester();
-			System.out.println("X: " + reflector.getX());
+			System.out.println("Before: " + reflector.getX());
 			reflector.ModifyX(5280);
-			System.out.println("X: " + reflector.getX());
+			System.out.println("After: " + reflector.getX());
 			System.out.println("Testing out of package protected fields");
 			ReflectionTarget protectedTarget = new ReflectionTarget();
 			// x is not visible to this class
 			// protectedTarget.x = 5;
 			ReflectionTester protectedReflector = new ReflectionTester(protectedTarget);
-			System.out.println("X: " + protectedReflector.getX());
+			System.out.println("Before: " + protectedReflector.getX());
 			protectedReflector.ModifyX(-9001);
-			System.out.println("X: " + protectedReflector.getX());
+			System.out.println("After: " + protectedReflector.getX());
 		} catch (Exception e) {
 			System.err.println("Part 3 exception: " + e.getMessage());
 		}

@@ -2,6 +2,7 @@ package classLoaders;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
 
 /**
  * Tests HW02 Part 1.
@@ -13,6 +14,12 @@ public class ClassLoaderMain {
 	public static void main(String[] args) {
 		// feeding in the relative location of the test class
 		String classLocation = "../DMZ/TestClass.class";
+		// if there is a command line arg use it as the path
+		if(args.length > 0) {
+			classLocation = args[0];
+			System.out.println("File: " + classLocation);
+			System.out.println("PWD: " + Paths.get("").toAbsolutePath().toString());
+		}
 		URL[] urls = {};
 		// try with resources
 		try (MyCustomClassLoader loader = new MyCustomClassLoader(urls)) {
