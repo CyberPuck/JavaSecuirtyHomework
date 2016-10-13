@@ -16,4 +16,8 @@ public class Pass22 {
 		}
 		return false;
 	}
+	
+	private static int test() {
+		return 1;
+	}
 }
