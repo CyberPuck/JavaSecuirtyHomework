@@ -1,5 +1,11 @@
 package accessControl;
 
+/**
+ * Class with a protected variable.
+ * 
+ * @author Kyle
+ *
+ */
 public class TestClassB {
 	protected int variableB = 2;
 
@@ -7,6 +13,9 @@ public class TestClassB {
 		a.variableA = newValue;
 	}
 
+	/**
+	 * Prints the integer variable variableB.
+	 */
 	public void printB() {
 		System.out.println("B: " + variableB);
 	}

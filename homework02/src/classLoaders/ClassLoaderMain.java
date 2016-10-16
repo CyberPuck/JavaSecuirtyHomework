@@ -5,12 +5,21 @@ import java.net.URL;
 import java.nio.file.Paths;
 
 /**
- * Tests HW02 Part 1.
+ * Tests Loading a custom class using a custom class loader.
  * 
  * @author Kyle
  */
 public class ClassLoaderMain {
 
+	/**
+	 * Entry point for testing the {@link classLoaders.MyCustomClassLoader
+	 * custom class loader}.
+	 * 
+	 * @param args
+	 *            - first command line arg points to the desired class file to
+	 *            load using the {@link classLoaders.MyCustomClassLoader custom
+	 *            class loader}
+	 */
 	public static void main(String[] args) {
 		// feeding in the relative location of the test class
 		String classLocation = "../DMZ/TestClass.class";

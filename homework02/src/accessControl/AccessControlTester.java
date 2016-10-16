@@ -3,7 +3,8 @@ package accessControl;
 import classLoaders.ReflectionTarget;
 
 /**
- * Tests HW02 Part 2.
+ * Entry point for testing access control to protected and private variables in
+ * a class.
  * 
  * @author Kyle
  */

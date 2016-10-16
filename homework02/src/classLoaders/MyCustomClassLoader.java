@@ -7,12 +7,31 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Custom implementation of a class loader extending the {@link URLClassLoader}
+ * 
+ * @author Kyle
+ *
+ */
 public class MyCustomClassLoader extends URLClassLoader {
 
+	/**
+	 * Constructor, operates the same as a URLClassLoader, for this program urls
+	 * can be empty.
+	 * 
+	 * @param urls
+	 */
 	public MyCustomClassLoader(URL[] urls) {
 		super(urls);
 	}
 
+	/**
+	 * Modifed to look for a class on a custom class path defined by the user.
+	 * 
+	 * @param name
+	 *            is the file path to the class file (including the class file
+	 *            itself).
+	 */
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		// TODO Auto-generated method stub

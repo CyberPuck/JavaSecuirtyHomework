@@ -1,7 +1,7 @@
 package classLoaders;
 
 /**
- * Reflection target in a different package.
+ * Reflection target in the {@link accessControl.AccessControlTester} class.
  * 
  * @author Kyle
  */
