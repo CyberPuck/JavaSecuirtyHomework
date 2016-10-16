@@ -1,7 +1,8 @@
 package classVerifier;
 
 /**
- * Break bytecode verification.
+ * Break bytecode verification. In this case y++ is modified to x++ in the class
+ * file, this fails as x has not been initialized yet.
  * 
  * @author Kyle
  */

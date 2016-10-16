@@ -1,7 +1,8 @@
 package classVerifier;
 
 /**
- * Class with static method call to break type data semantic checks.
+ * Class with static method call to break type data semantic checks. In this
+ * case the class Pass21 is modified to not be a subclass Object.
  * 
  * @author Kyle
  */

@@ -1,7 +1,9 @@
 package classVerifier;
 
 /**
- * Class with static method call to break type data semantic checks.
+ * Class with static method call to break type data semantic checks. In this
+ * case the {@link classVerifier.Pass22#helloWorld(int) boolean helloWorld(int
+ * x)} is changed to: boolean helloWorld().
  * 
  * @author Kyle
  */
@@ -16,7 +18,7 @@ public class Pass22 {
 		}
 		return false;
 	}
-	
+
 	private static int test() {
 		return 1;
 	}

@@ -1,7 +1,8 @@
 package classVerifier;
 
 /**
- * Break bytecode verification, bytecode will be malformed.
+ * Break bytecode verification, bytecode will be malformed. The bytecode for
+ * line 13 (y++) is changed to aconst_null.
  * 
  * @author Kyle
  */

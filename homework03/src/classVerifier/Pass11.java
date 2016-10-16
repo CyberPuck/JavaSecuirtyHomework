@@ -1,7 +1,8 @@
 package classVerifier;
 
 /**
- * Simple class that will have binary class file modified.
+ * Simple class that will have binary class file modified. This class will have
+ * its version modified to an incorrect value.
  * 
  * @author Kyle
  */
