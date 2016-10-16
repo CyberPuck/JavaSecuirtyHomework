@@ -9,8 +9,22 @@ import java.util.logging.Logger;
 
 import utilities.FileIO;
 
+/**
+ * Simulates a one time pad cipher.
+ * 
+ * @author Kyle
+ */
 public class OneTimePadCipher {
 
+	/**
+	 * One Time Pad Cipher entry point.
+	 * 
+	 * NOTE: If no file is in the args, an error is printed out.
+	 * 
+	 * @param args
+	 *            enter the file to encrypt/decrypt
+	 * 
+	 */
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.err.println("Please enter the file name to encrypt");

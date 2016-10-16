@@ -28,6 +28,13 @@ public class QuantumKey {
 	// measurements based on the key and basis values
 	private Polarization[] photonPolarization;
 
+	/**
+	 * Builds a base quantum key with a given length.
+	 * 
+	 * @param keyLength
+	 *            the starting length of the quantum key, will be reduced after
+	 *            transfer
+	 */
 	public QuantumKey(int keyLength) {
 		// setup the arrays
 		key = new int[keyLength];
@@ -43,7 +50,7 @@ public class QuantumKey {
 	}
 
 	/**
-	 * Generates the quantum key and components from scratch
+	 * Generates the quantum key and components from scratch.
 	 */
 	public void generateKey() {
 		// generate the key and basis
@@ -66,7 +73,7 @@ public class QuantumKey {
 	 * Given a set of polarizations guess the basis and measure the binary
 	 * output.
 	 * 
-	 * @param sentPolarizations
+	 * @param sentPolarizations transmitted polarizations
 	 */
 	public void measureKey(Polarization[] sentPolarizations) {
 		if (sentPolarizations.length != key.length) {
@@ -191,6 +198,9 @@ public class QuantumKey {
 		return basisSet;
 	}
 
+	/**
+	 * Prints data in class in a ordered manner.
+	 */
 	@Override
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder("QuantumKey:\n");
@@ -228,8 +238,5 @@ public class QuantumKey {
 			}
 		}
 		return stringBuilder.toString();
-		// return "QuantumKey [key=" + Arrays.toString(key) + ",\nbasisSet="
-		// + Arrays.toString(basisSet) + ",\nphotonPolarization="
-		// + Arrays.toString(photonPolarization) + "]";
 	}
 }

@@ -1,5 +1,12 @@
 package quantumKeySimulator;
 
+/**
+ * Entry point for the application, simulates an simple Alice/Bob quantum key
+ * exchange and Alice/Eve/Bob quantum key exchange. Afterwards polarization is
+ * compared between Alice and Bob.
+ * 
+ * @author Kyle
+ */
 public class QuantumKeySimulator {
 
 	public static void main(String[] args) {

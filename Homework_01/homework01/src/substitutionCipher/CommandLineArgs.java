@@ -19,6 +19,10 @@ public class CommandLineArgs {
 	// expected number of command line args
 	private static int EXPECTED_NUMBER_OF_ARGS = 4;
 
+	/**
+	 * Setups up the default parameters, encryptionMode is set to DECRYPT, all
+	 * paths are empty strings.
+	 */
 	public CommandLineArgs() {
 		mode = EncryptionMode.DECRYPT;
 		keyPath = "";

@@ -1,7 +1,22 @@
 package substitutionCipher;
 
+/**
+ * Entry point for testing the substitution cipher. Takes in command line args,
+ * parses them and executes decryption or encryption based on the options
+ * provided.
+ * 
+ * @author Kyle
+ *
+ */
 public class SubstitutionCipher {
 
+	/**
+	 * Given command line args, find the files to update and read, finally
+	 * execute the desired encryption/decryption.
+	 * 
+	 * @param args
+	 *            Command line arguments to parse.
+	 */
 	public static void main(String[] args) {
 		// Parse command line arguments
 		CommandLineArgs substiutionArgs = new CommandLineArgs();
