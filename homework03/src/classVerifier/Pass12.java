@@ -7,6 +7,13 @@ package classVerifier;
  * @author Kyle
  */
 public class Pass12 {
+
+	/**
+	 * Main Function.
+	 * 
+	 * @param args
+	 *            not used
+	 */
 	public static void main(String[] args) {
 		System.out.println("Hello world");
 	}

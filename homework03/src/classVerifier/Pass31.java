@@ -7,10 +7,17 @@ package classVerifier;
  * @author Kyle
  */
 public class Pass31 {
+
+	/**
+	 * Main Function.
+	 * 
+	 * @param args
+	 *            not used
+	 */
 	public static void main(String[] args) {
 		int x;
 		int y = 5;
-		y++;
+		y++; // Will be updated in class editor
 		x = 5;
 		System.out.println(y + ", " + x);
 	}
