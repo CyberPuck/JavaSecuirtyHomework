@@ -1,6 +1,8 @@
 package dosPuzzle;
 
+import java.math.BigInteger;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 /**
@@ -17,33 +19,53 @@ public class DosPuzzle {
 	private int preImageBitLength;
 	// number of y bits
 	private int yBitsLength;
-	// represents the random x+ y bits array
-	private byte[] xAndYBytes;
+	// represents the random x bits
+	private String xBits;
+	// represents the yBits
+	private String yBits;
 	// result from the SHA-1 HASH
 	private byte[] hash;
 
-	public DosPuzzle(int numberOfBits, int yBits) throws Exception {
+	/**
+	 * Given the total preimage size and number of y bits, create a random
+	 * binary string composed of x and y bits and generate a SHA-1 hash. The x
+	 * bits and hash will be exposed so the puzzle can be solved.
+	 * 
+	 * @param numberOfBits
+	 *            total preimage puzzle size
+	 * @param yBits
+	 *            number of bits in the preimage to be solved for
+	 */
+	public DosPuzzle(int numberOfBits, int yBits) {
 		// verify the puzzle is correct
 		if (numberOfBits < yBits) {
-			throw new Exception("Number of Y bits cannot exceed the total number of bits in the puzzle.");
+			xBits = "";
+			return;
 		}
 		// store the desired x and y sizes
 		this.preImageBitLength = numberOfBits;
 		this.yBitsLength = yBits;
 		// calculate the bits for x and y
-		// since bytes are 8 bits, calculate the number of bytes required for x
-		// + y
-		int numberOfBytes = (int) Math.ceil(this.preImageBitLength / 8.0);
-		this.xAndYBytes = new byte[numberOfBytes];
-		rng.nextBytes(this.xAndYBytes);
-		// clear out extra bits at the end
-		int extraBits = this.preImageBitLength % 8;
-		xAndYBytes[xAndYBytes.length - 1] = (byte) (xAndYBytes[xAndYBytes.length - 1] >> extraBits);
+		// NOTE using a string representing the binary data
+		String preImage = "";
+		for (int i = 0; i < preImageBitLength; i++) {
+			preImage = preImage + (rng.nextBoolean() ? '1' : '0');
+		}
+		// store the x bits
+		this.xBits = preImage.substring(0, preImage.length() - this.yBitsLength);
+		this.yBits = preImage.substring(preImage.length() - this.yBitsLength);
+		// convert the preImage string to bytes
+		byte[] xAndYBytes = new BigInteger(preImage, 2).toByteArray();
 
 		// setup message digest as SHA-1
-		MessageDigest md = MessageDigest.getInstance("SHA-1");
-		// compute the hash
-		this.hash = md.digest(xAndYBytes);
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("SHA-1");
+			// compute the hash
+			this.hash = md.digest(xAndYBytes);
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println("SHA-1 algorithm not found!  Cannot create puzzle.");
+		}
 	}
 
 	/**
@@ -52,33 +74,16 @@ public class DosPuzzle {
 	 * @return Returns the byte array, note last element in array will be bit
 	 *         shifted left if bits don't match byte boundary
 	 */
-	public byte[] getXBits() {
-		int numXBytes = (int)Math.floor((this.preImageBitLength - this.yBitsLength) / 8.0);
-		// check if the x bits match the byte boundary
-		if((this.preImageBitLength - this.yBitsLength) % 8 != 0) {
-			numXBytes++;
-		}
-		byte[] xBytes = new byte[numXBytes];
-		xBytes[xBytes.length - 1] = (byte) (xBytes[xBytes.length - 1] >> ((this.preImageBitLength - this.yBitsLength) % 8));
-		return xBytes;
+	public String getXBits() {
+		return xBits;
 	}
 
 	/**
-	 * TODO: Remove, for testing only.
+	 * Gets the length of the y bits in the puzzle. Note the y bits themselves
+	 * are not exposed as that would make solving the puzzle trivial.
 	 * 
-	 * @return byte array representing y.
+	 * @return size of y bits in number of bits
 	 */
-	public byte[] getYBits() {
-		int numYBytes = (int)Math.floor((this.yBitsLength) / 8.0);
-		// check if the y bits match the byte boundary
-		if((this.yBitsLength) % 8 != 0) {
-			numYBytes++;
-		}
-		byte[] yBytes = new byte[numYBytes];
-		yBytes[yBytes.length - 1] = (byte) (yBytes[yBytes.length - 1] >> ((this.yBitsLength) % 8));
-		return yBytes;
-	}
-
 	public int getYBitLength() {
 		return yBitsLength;
 	}
