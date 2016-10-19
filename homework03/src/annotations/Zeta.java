@@ -2,7 +2,7 @@ package annotations;
 
 /**
  * Class handling security annotations. The test methods m1, m2, m3 are included
- * as well as the defined annotations for each method.
+ * as well as the defined annotations needed for each method.
  * 
  * @author Kyle
  *
@@ -55,8 +55,8 @@ public class Zeta {
 
 	/**
 	 * This function needs an authorization check, lock a critical resource, and
-	 * audit the event. This could be an admin attempting to modify a user role
-	 * or attribute.
+	 * audit the event. This could be an administrator attempting to modify a
+	 * user role or attribute file.
 	 */
 	@authorizationCheck
 	@lockCriticalResource
