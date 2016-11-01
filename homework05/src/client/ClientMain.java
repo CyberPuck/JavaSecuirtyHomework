@@ -22,6 +22,10 @@ public class ClientMain {
 			ClientSSLSocket socket = new ClientSSLSocket(parser.getHostName(), parser.getPort());
 			try {
 				socket.run();
+				long startTime = System.currentTimeMillis();
+				while(System.currentTimeMillis() - startTime < 60000) {
+					// do nothing
+				}
 			} catch(Exception e) {
 				System.err.println("Socket err: " + e.getMessage());
 			}
