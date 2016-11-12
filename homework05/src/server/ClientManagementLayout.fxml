@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<!-- Handles the client certificate information: displaying to the user, 
+	allowing for clearance level updating, and revoking the client's certificate. -->
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1">
+	<!-- TODO Add Nodes -->
+</AnchorPane>
+

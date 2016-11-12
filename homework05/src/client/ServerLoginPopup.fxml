@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+
+<!-- Handles getting the server address, client user name, and password for 
+	logging into a messaging server. -->
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1">
+	<!-- TODO Add Nodes -->
+</AnchorPane>
+
