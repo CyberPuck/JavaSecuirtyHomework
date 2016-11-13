@@ -2,16 +2,13 @@ package client;
 
 /**
  * Handles parsing and verifying the command line args for the client
- * application. This includes: server host name/IP, port number, clearance
- * level.
+ * application. This includes: the location of the keystore
  * 
  * @author Kyle
  */
 public class CommandLineArgs {
-	// Port of the server, defaults to 8080
-	private int port = 8080;
-	// host name of the server, defaults to '127.0.0.1'
-	private String hostName = "127.0.0.1";
+	// Location of the keystore
+	private String keystoreLocation = ".keystore";
 
 	/**
 	 * Default constructor, all local variables are set before construction.
@@ -32,17 +29,8 @@ public class CommandLineArgs {
 		for (int i = 0; i < args.length; i++) {
 			// make sure the string is lower case
 			switch (args[i].toLowerCase()) {
-			case "-p": // port
-				try {
-					port = Integer.parseInt(args[++i]);
-				} catch (NumberFormatException e) {
-					System.out.println(args[i] + " must be a valid integer");
-					printHelp();
-					return false;
-				}
-				break;
-			case "-h": // host name
-				this.hostName = args[++i];
+			case "-k": // keystore
+				keystoreLocation = args[++i];
 				break;
 			case "--help": // print help and stop execution
 				printHelp();
@@ -61,30 +49,20 @@ public class CommandLineArgs {
 	 */
 	private void printHelp() {
 		System.out.println("\n\nClient  ");
-		System.out.println("This client can take no input which results in a connection to 127.0.0.1:8080");
+		System.out.println("This client can take no input which results in assuming the keystore is located at: ./.keystore");
 		System.out.println("Expected format: java client [<flag> <arg>]");
-		System.out.println("Example: java ClientMain -h testServer -p 1234");
-		System.out.println("<-h>   Custom host name or IP address of the server, default=127.0.0.1");
-		System.out.println("<-p>:  Port of the server, default=8080");
+		System.out.println("Example: java ClientMain -k ../awesome.keystore");
+		System.out.println("<-k>   Custom location of the keystore, default=./.keystore");
 
 	}
 
 	/**
-	 * Gets the port number to the server.
+	 * Gets the keystore location.
 	 * 
-	 * @return integer representing the port number.
+	 * @return String representing the path to the keystore.
 	 */
-	public int getPort() {
-		return port;
-	}
-
-	/**
-	 * Gets the address of the server, either IP or host name.
-	 * 
-	 * @return String representing the address of the server.
-	 */
-	public String getHostName() {
-		return hostName;
+	public String getKeystoreLocation() {
+		return keystoreLocation;
 	}
 
 }
