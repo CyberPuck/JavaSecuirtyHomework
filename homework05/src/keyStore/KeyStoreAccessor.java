@@ -23,8 +23,6 @@ public class KeyStoreAccessor {
 		try {
 			keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
 			// try to read in the key store
-			System.out.println("Working Directory = " +
-		              System.getProperty("user.dir"));
 			try(FileInputStream fis = new FileInputStream(keyStorePath)) {
 				keyStore.load(fis, password);
 			} catch(IOException e) {
