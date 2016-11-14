@@ -27,6 +27,8 @@ public class ClientMain extends Application {
 	private Stage primaryStage;
 	// initial log in pop up controller
 	private KeystoreAccessController popupController;
+	// controller for the primary UI
+	private ClientUILayoutController clientController;
 
 	/**
 	 * Entry point for the application, takes in command line args and spins up
@@ -78,22 +80,13 @@ public class ClientMain extends Application {
 		// clear out password
 		Arrays.fill(password, ' ');
 		if (keyStore == null) {
-			System.err.println("Keystore failed to open at:  " + parser.getKeystoreLocation()
-					+ " either the keystore does not exist or the password was incorrect");
+			System.err.println("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
+					+ "\" either the keystore does not exist or the password was incorrect");
 			System.exit(1);
 		}
 		// remove the popup UI
 		this.popupController.getKeystoreAccessStage().close();
-		// fire up the client UI
-		try {
-			Pane pane = FXMLLoader.load(getClass().getResource("ClientUILayout.fxml"));
-			Scene myScene = new Scene(pane);
-            primaryStage.setScene(myScene);
-            primaryStage.setResizable(true);
-            primaryStage.show();
-		} catch (IOException e) {
-			System.err.println("Failed to load the primary UI");
-			System.exit(1);
-		}
+		// setup the client UI
+		this.clientController = new ClientUILayoutController(this.primaryStage);
 	}
 }

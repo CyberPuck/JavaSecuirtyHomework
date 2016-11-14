@@ -57,6 +57,7 @@ public class KeystoreAccessController implements Initializable {
 			this.keystoreAccessStage.setScene(keystoreScene);
 		} catch (Exception e) {
 			System.err.println("Failed to load KeystoreAccess UI: " + e.getMessage());
+			System.exit(1);
 		}
 	}
 
