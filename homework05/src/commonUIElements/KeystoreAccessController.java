@@ -3,7 +3,6 @@ package commonUIElements;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import client.ClientMain;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -30,8 +29,8 @@ public class KeystoreAccessController implements Initializable {
 	private Button unlockKeystoreBtn;
 	// The stage context, will be used to show this pop up
 	private Stage keystoreAccessStage;
-	// handle to client main, used to notify when the client has tried to log in
-	private ClientMain main;
+	// handle to main component that will handle the login data.
+	private KeystoreAccessInterface main;
 
 	/**
 	 * Constructor, setups the JavaFX controller, keystore authentication UI,
@@ -42,7 +41,7 @@ public class KeystoreAccessController implements Initializable {
 	 * @param main
 	 *            handle to ClientMain for when the password is entered.
 	 */
-	public KeystoreAccessController(ClientMain main) {
+	public KeystoreAccessController(KeystoreAccessInterface main) {
 		this.main = main;
 		// load the scene
 		try {

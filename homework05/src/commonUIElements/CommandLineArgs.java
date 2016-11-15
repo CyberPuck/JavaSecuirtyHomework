@@ -1,19 +1,22 @@
-package client;
+package commonUIElements;
 
 /**
- * Handles parsing and verifying the command line args for the client
- * application. This includes: the location of the keystore
+ * Handles parsing and verifying the command line args for the application. This
+ * includes: the location of the keystore
  * 
  * @author Kyle
  */
 public class CommandLineArgs {
 	// Location of the keystore
 	private String keystoreLocation = ".keystore";
+	private String mainName = "unknown";
 
 	/**
-	 * Default constructor, all local variables are set before construction.
+	 * Constructor, allows the name of the application to be passed into the
+	 * parser. The name will be displayed when help is displayed.
 	 */
-	public CommandLineArgs() {
+	public CommandLineArgs(String mainName) {
+		this.mainName = mainName;
 	}
 
 	/**
@@ -48,10 +51,11 @@ public class CommandLineArgs {
 	 * Prints the usage for command line args to System.out.
 	 */
 	private void printHelp() {
-		System.out.println("\n\nClient  ");
-		System.out.println("This client can take no input which results in assuming the keystore is located at: ./.keystore");
-		System.out.println("Expected format: java client [<flag> <arg>]");
-		System.out.println("Example: java ClientMain -k ../awesome.keystore");
+		System.out.println("\n\n" + mainName + "  ");
+		System.out.println(
+				mainName + " can take no input which results in assuming the keystore is located at: ./.keystore");
+		System.out.println("Expected format: java " + mainName + "Main [<flag> <arg>]");
+		System.out.println("Example: java " + mainName + "Main -k ../awesome.keystore");
 		System.out.println("<-k>   Custom location of the keystore, default=./.keystore");
 
 	}
