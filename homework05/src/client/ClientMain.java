@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.util.Arrays;
 
+import commonUIElements.CommandLineArgs;
 import commonUIElements.KeystoreAccessController;
+import commonUIElements.KeystoreAccessInterface;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -17,11 +19,11 @@ import keyStore.KeyStoreAccessor;
  * 
  * @author Kyle
  */
-public class ClientMain extends Application {
+public class ClientMain extends Application implements KeystoreAccessInterface{
 	// The title of the UI application
 	private String title = "Secure Chat Client";
 	// command line args that have been parsed
-	private static CommandLineArgs parser = new CommandLineArgs();
+	private static CommandLineArgs parser = new CommandLineArgs("Client");
 	// handle to the primary stage of the application, used so if the keystore
 	// is unlocked the client UI will boot up
 	private Stage primaryStage;
@@ -73,7 +75,8 @@ public class ClientMain extends Application {
 		popupController = new KeystoreAccessController(this);
 		popupController.getKeystoreAccessStage().show();
 	}
-
+	
+	@Override
 	public void onLoginRequest(final char[] password) {
 		// Try to open the keystore
 		KeyStore keyStore = KeyStoreAccessor.getKeyStore(password, parser.getKeystoreLocation());

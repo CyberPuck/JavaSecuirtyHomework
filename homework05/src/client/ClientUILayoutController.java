@@ -60,7 +60,6 @@ public class ClientUILayoutController implements Initializable {
 			System.err.println("Failed to load the primary UI");
 			System.exit(1);
 		}
-
 	}
 
 	@Override
