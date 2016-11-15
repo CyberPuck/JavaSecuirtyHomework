@@ -30,7 +30,7 @@ public class ClientUILayoutController implements Initializable {
 	@FXML
 	private TextArea msgField;
 	@FXML
-	private ChoiceBox clearanceComboBox;
+	private ChoiceBox<Integer> clearanceComboBox;
 	@FXML
 	private Button sendMsgBtn;
 	// flag indicating if the client is connected to the sever
@@ -65,6 +65,9 @@ public class ClientUILayoutController implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		// add clearance levels to comboBox
+		this.clearanceComboBox.getItems().addAll(1, 2, 3, 4);
+		this.clearanceComboBox.setValue(1);
 		// Handle the buttons
 		sendMsgBtn.setDisable(true);
 		// setup button listeners
