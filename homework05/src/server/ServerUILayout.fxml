@@ -14,64 +14,54 @@
 <!-- Handles the primary controls for the server once the server keystore 
 	is accessible. -->
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-	minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
-	tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.65"
-	xmlns:fx="http://javafx.com/fxml/1">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
 	<tabs>
 		<Tab text="Activity">
-			<content>
-				<TextArea prefHeight="177.0" prefWidth="433.0" />
-			</content>
+         <content>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <Label layoutX="14.0" layoutY="6.0" text="Received Messages:" />
+                  <TextArea fx:id="activityMsgArea" layoutX="14.0" layoutY="23.0" prefHeight="305.0" prefWidth="572.0" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="23.0" />
+                  <Label layoutX="14.0" layoutY="340.0" text="Log file is located at:" />
+                  <TextField fx:id="activityLogFilefield" layoutX="130.0" layoutY="336.0" prefHeight="25.0" prefWidth="457.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="14.0" />
+               </children>
+            </AnchorPane>
+         </content>
 		</Tab>
 		<Tab closable="false" text="Clients">
 			<content>
-				<ScrollPane prefHeight="200.0" prefWidth="200.0">
+				<ScrollPane fx:id="clientScrollPane" prefHeight="200.0" prefWidth="200.0">
 					<content>
-						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="372.0"
-							prefWidth="600.0" />
+						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="372.0" prefWidth="600.0" />
 					</content>
 				</ScrollPane>
 			</content>
 		</Tab>
 		<Tab closable="false" text="Settings">
 			<content>
-				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0"
-					prefWidth="200.0">
+				<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 					<children>
 						<Label layoutX="14.0" layoutY="14.0" text="Log file location:" />
-						<TextField layoutX="127.0" layoutY="10.0" prefHeight="25.0"
-							prefWidth="398.0" />
-						<Button layoutX="531.0" layoutY="10.0" mnemonicParsing="false"
-							text="Browse" AnchorPane.rightAnchor="14.0" />
-						<Button layoutX="181.0" layoutY="126.0" mnemonicParsing="false"
-							prefHeight="70.0" prefWidth="237.0" text="Save Settings, will restart server" />
-						<Separator layoutY="203.0" prefHeight="8.0" prefWidth="600.0" />
-						<Label layoutX="14.0" layoutY="42.0" text="Max clearance level:" />
-						<TextField layoutX="127.0" layoutY="38.0" prefHeight="25.0"
-							prefWidth="73.0" />
-						<Label layoutX="13.0" layoutY="211.0"
-							text="Client Certificate Management:">
+						<TextField fx:id="settingsLogFileField" layoutX="127.0" layoutY="10.0" prefHeight="25.0" prefWidth="398.0" />
+						<Button fx:id="logFileBrowser" layoutX="531.0" layoutY="10.0" mnemonicParsing="false" text="Browse" AnchorPane.rightAnchor="14.0" />
+						<Button layoutX="182.0" layoutY="76.0" mnemonicParsing="false" prefHeight="70.0" prefWidth="237.0" text="Save Settings, will restart server" />
+						<Separator layoutY="154.0" prefHeight="8.0" prefWidth="600.0" />
+						<Label layoutX="4.0" layoutY="162.0" text="Client Certificate Management:">
 							<font>
 								<Font size="18.0" />
 							</font>
 						</Label>
-						<Button layoutX="190.0" layoutY="241.0" mnemonicParsing="false"
-							prefHeight="53.0" prefWidth="219.0" text="Revoke all client certifiates">
+						<Button fx:id="revokeClientCertBtn" layoutX="191.0" layoutY="189.0" mnemonicParsing="false" prefHeight="53.0" prefWidth="219.0" text="Revoke all client certifiates">
 							<font>
 								<Font size="14.0" />
 							</font>
 						</Button>
-						<Label layoutX="13.0" layoutY="303.0" text="Import client certificate:" />
-						<TextField layoutX="153.0" layoutY="299.0" prefHeight="25.0"
-							prefWidth="367.0" />
-						<Button layoutX="530.0" layoutY="299.0" mnemonicParsing="false"
-							text="Browse" />
-						<Button layoutX="153.0" layoutY="332.0" mnemonicParsing="false"
-							prefHeight="25.0" prefWidth="141.0" text="Import client certificate" />
-						<Label layoutX="14.0" layoutY="72.0" text="Server Port:" />
-						<TextField layoutX="127.0" layoutY="68.0" prefHeight="25.0"
-							prefWidth="74.0" />
+						<Label layoutX="14.0" layoutY="281.0" text="Import client certificate:" />
+						<TextField fx:id="clientCertField" layoutX="154.0" layoutY="277.0" prefHeight="25.0" prefWidth="367.0" />
+						<Button fx:id="browseCertBtn" layoutX="531.0" layoutY="277.0" mnemonicParsing="false" text="Browse" />
+						<Button fx:id="importCertBtn" layoutX="154.0" layoutY="310.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="141.0" text="Import client certificate" />
+						<Label layoutX="14.0" layoutY="46.0" text="Server Port:" />
+						<TextField fx:id="serverPortField" layoutX="127.0" layoutY="42.0" prefHeight="25.0" prefWidth="74.0" />
 					</children>
 				</AnchorPane>
 			</content>
