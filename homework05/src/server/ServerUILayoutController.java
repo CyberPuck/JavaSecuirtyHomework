@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
+import commonUIElements.SocketResponseInterface;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,7 +24,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class ServerUILayoutController implements Initializable{
+public class ServerUILayoutController implements Initializable, SocketResponseInterface{
 	@FXML
 	private TextArea activityMsgArea;
 	@FXML
@@ -55,6 +58,8 @@ public class ServerUILayoutController implements Initializable{
 	private Properties settings;
 	private String settingsFile;
 	private FileChooser fileChooser = new FileChooser();
+	private ServerSSLSocket serverSSLSocket;
+	private BlockingQueue<String> messages = new ArrayBlockingQueue<String>(5);
 	// TODO: Implement server start up popup
 	
 	public ServerUILayoutController(Stage primaryStage, Properties settings, String settingsFile) {
@@ -75,6 +80,8 @@ public class ServerUILayoutController implements Initializable{
 			serverUIStage.show();
 			// init the login controller
 //			loginController = new ServerLoginPopupController(this.serverUIStage, this);
+			
+			serverSSLSocket = new ServerSSLSocket(Integer.parseInt(settings.getProperty(SERVER_PORT_PROPTERTY)), messages, this);
 		} catch (IOException e) {
 			System.err.println("Failed to load the primary UI");
 			System.exit(1);
@@ -112,6 +119,7 @@ public class ServerUILayoutController implements Initializable{
 				// TODO: update the logger
 				// TODO: stop the server if it is running
 				if(serverOnline) {
+					serverSSLSocket.stop();
 					System.out.println("TODO: Stop the server");
 				}
 			}
@@ -135,13 +143,31 @@ public class ServerUILayoutController implements Initializable{
 				if(!serverOnline) {
 					serverBtn.setText("Stop Server");
 					// start the server
+					try {
+						
+						serverSSLSocket.startServer();
+					} catch(Exception e) {
+						activityMsgArea.setText(activityMsgArea.getText() + "Error: " + e.getMessage() + "\n");
+					}
 				} else {
 					serverBtn.setText("Start Server");
 					// stop the server
+					serverSSLSocket.stop();
 				}
 				// toggle boolean
 				serverOnline = !serverOnline;
 			}
 		});
+	}
+
+	@Override
+	public void socketMessage(String message) {
+		activityMsgArea.setText(activityMsgArea.getText() + message + "\n");
+	}
+
+	@Override
+	public void socketError(String error) {
+		activityMsgArea.setText(activityMsgArea.getText() + "Error: " + error + "\n");
+		// stop socket
 	}
 }

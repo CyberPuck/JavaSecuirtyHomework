@@ -1,10 +1,13 @@
 package server;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -16,85 +19,103 @@ import java.util.concurrent.Future;
  *
  */
 public class ServerSSLSocket {
-	private int port;
+	private class QueueReaderThread implements Runnable {
 
-	private class ReadThread implements Runnable {
-		private AsynchronousSocketChannel socketChannel;
-		private volatile boolean stopper;
-
-		public ReadThread(AsynchronousSocketChannel ch) {
-			this.socketChannel = ch;
+		private volatile boolean stop = false;
+		private BlockingQueue<String> messages;
+		ServerUILayoutController controller;
+		
+		public QueueReaderThread(BlockingQueue<String> messages, ServerUILayoutController controller) {
+			this.messages = messages;
+			this.controller = controller;
 		}
-
-		public void stop() {
-			this.stopper = true;
-		}
-
+		
 		@Override
 		public void run() {
-			// Handle reading data until we exit
-			ByteBuffer buf = ByteBuffer.allocate(1024);
-			while (!stopper && socketChannel.isOpen()) {
-				Future<Integer> f = socketChannel.read(buf);
-				while (!f.isDone() && !stopper) {
-					// wait
-				}
-				int size = 0;
-				try {
-					size = f.get();
-				} catch(Exception e) {
-					System.err.println("Unable to get data length");
-				}
-				String data = new String(buf.array(), 0, size);
-				System.out.println("RXed: " + data);
-				if (data.equals("hello")) {
-					socketChannel.write(ByteBuffer.wrap("HI!".getBytes()));
+			while(!stop) {
+				String msg;
+				while((msg = messages.poll()) != null) {
+					controller.socketMessage(msg);
 				}
 			}
-			System.out.println("Exiting thread...");
 		}
-
+		
+		public void terminate() {
+			stop = true;
+		}
 	}
-
-	public ServerSSLSocket(int port) {
+	
+	private int port;
+	private AsynchronousServerSocketChannel connector;
+	private ArrayList<ClientRepresentative> clients;
+	private BlockingQueue<String> messages;
+	// needed to respond to UI
+	private ServerUILayoutController controller;
+	private Thread thread;
+	private QueueReaderThread reader;
+	
+	public ServerSSLSocket(int port, BlockingQueue<String> messages, ServerUILayoutController controller) {
 		this.port = port;
+		this.messages = messages;
+		this.controller = controller;
+		this.clients = new ArrayList<>();
 	}
 
 	public void startServer() throws Exception {
-		final AsynchronousServerSocketChannel connector = AsynchronousServerSocketChannel.open()
+		connector = AsynchronousServerSocketChannel.open()
 				.bind(new InetSocketAddress(port));
+		
+		// setup the blocking queue reader thread
+		reader = new QueueReaderThread(messages, controller);
+		thread = new Thread(reader);
+		thread.start();
 
 		// accept incoming clients
 		connector.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
 
 			@Override
 			public void completed(AsynchronousSocketChannel ch, Void attachment) {
-				System.out.println("Client connected!");
+				// TODO: Log
+				 System.out.println("Client connected!");
 				// handle I/O
 				connector.accept(null, this);
-				// start up the reader thread
-				Thread reader = new Thread(new ReadThread(ch));
-				reader.start();
-				// greet the client
-				System.out.println("Sending Message");
-				Future<Integer> f = ch.write(ByteBuffer.wrap("hello".getBytes()));
-				try {
-					System.out.println("Server TX: " + f.get());
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				// create the client
+				ClientRepresentative client = new ClientRepresentative(ch, "client" + clients.size(), messages);
+				clients.add(client);
 			}
 
 			@Override
 			public void failed(Throwable exc, Void attachment) {
 				System.err.println("Failed to connect: " + exc.getMessage());
-
+				controller.socketError("Failed to connect: " + exc.getMessage());
 			}
-
 		});
+		System.out.println("Ready for clients");
+	}
+	
+	public void writeMessage(String message) {
+		// TODO: Need to check clearance levels with the clients
+		for(ClientRepresentative client : this.clients) {
+			client.getSocketChannel().write(ByteBuffer.wrap(message.getBytes()));
+		}
+	}
+	
+	public void stop() {
+		try {
+			connector.close();
+		} catch (IOException e) {
+			System.err.println("Failed to kill server :( " + e.getMessage());
+			controller.socketError("Failed to connect: " + e.getMessage());
+		}
+		
+		reader.terminate();
+		try {
+			thread.join();
+		} catch (InterruptedException e1) {
+			System.err.println("FUCKIN' THREADS!!!!!");
+		}
+		for(ClientRepresentative rep : this.clients) {
+			rep.stop();
+		}
 	}
 }
