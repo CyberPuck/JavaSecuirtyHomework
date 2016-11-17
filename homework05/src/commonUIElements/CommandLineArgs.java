@@ -9,11 +9,17 @@ package commonUIElements;
 public class CommandLineArgs {
 	// Location of the keystore
 	private String keystoreLocation = ".keystore";
+	// name of the program running
 	private String mainName = "unknown";
+	// location of the settings file
+	private String settingsLocation = ".settings";
 
 	/**
 	 * Constructor, allows the name of the application to be passed into the
 	 * parser. The name will be displayed when help is displayed.
+	 * 
+	 * @param mainName
+	 *            name of the running application
 	 */
 	public CommandLineArgs(String mainName) {
 		this.mainName = mainName;
@@ -34,6 +40,9 @@ public class CommandLineArgs {
 			switch (args[i].toLowerCase()) {
 			case "-k": // keystore
 				keystoreLocation = args[++i];
+				break;
+			case "-s":
+				settingsLocation = args[++i];
 				break;
 			case "--help": // print help and stop execution
 				printHelp();
@@ -57,6 +66,7 @@ public class CommandLineArgs {
 		System.out.println("Expected format: java " + mainName + "Main [<flag> <arg>]");
 		System.out.println("Example: java " + mainName + "Main -k ../awesome.keystore");
 		System.out.println("<-k>   Custom location of the keystore, default=./.keystore");
+		System.out.println("<-s>   Custom location of the settings file, default=./.settings");
 
 	}
 
@@ -69,4 +79,23 @@ public class CommandLineArgs {
 		return keystoreLocation;
 	}
 
+	/**
+	 * Get the location of the settings file.
+	 * 
+	 * @return String representing the path to the settings file.
+	 */
+	public String getSettings() {
+		return settingsLocation;
+	}
+
+	/**
+	 * Shortcut to setup the settings file name/location. Useful for
+	 * establishing a custom default settings file.
+	 * 
+	 * @param settings
+	 *            custom settings file location.
+	 */
+	public void setSettings(String settings) {
+		this.settingsLocation = settings;
+	}
 }
