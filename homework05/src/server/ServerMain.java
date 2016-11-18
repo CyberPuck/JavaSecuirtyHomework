@@ -8,10 +8,15 @@ import java.io.IOException;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Properties;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import commonUIElements.CommandLineArgs;
 import commonUIElements.KeystoreAccessController;
 import commonUIElements.KeystoreAccessInterface;
+import commonUIElements.XMLLogFormatter;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import keyStore.KeyStoreAccessor;
@@ -23,9 +28,10 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 	private static CommandLineArgs parser;
 	private ServerUILayoutController serverContoller;
 	private static Properties settings;
+	private static Logger logger = Logger.getLogger(ServerMain.class.getName());
 
 	public static void main(String[] args) {
-//		long timeout = 60000;
+		// parse the command line
 		parser = new CommandLineArgs("Server");
 		parser.setSettings(".serverSettings");
 		if (parser.parseCommandLineArgs(args)) {
@@ -43,6 +49,7 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 					settings.setProperty("logFile", "log.xml");
 					settings.setProperty("port", "5280");
 					settings.store(new FileOutputStream(newSettingsFile), null);
+
 				} catch (IOException e2) {
 					System.err
 							.println("Failed to create default settings file, exiting application: " + e2.getMessage());
@@ -53,17 +60,23 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 				System.out.println("Failed to open settings file: " + e.getMessage());
 				System.exit(1);
 			}
-			// TODO: Implement controllers then add in SSL
-			// ServerSSLSocket socket = new ServerSSLSocket(parser.getPort());
-			// try {
-			// socket.startServer();
-			// long startTime = System.currentTimeMillis();
-			// while(System.currentTimeMillis() - startTime <= timeout) {
-			// // do nothing
-			// }
-			// } catch(Exception e) {
-			// System.err.println(e.getMessage());
-			// }
+			// setup the logger
+			try {
+				// setup console logger
+				ConsoleHandler ch = new ConsoleHandler();
+				ch.setFormatter(new SimpleFormatter());
+				logger.addHandler(ch);
+				// setup XML logger, appending so there is an audit trail over
+				// the life of the log file
+				FileHandler fileHandler = new FileHandler(settings.getProperty("logFile"), true);
+				fileHandler.setFormatter(new XMLLogFormatter());
+				logger.addHandler(fileHandler);
+
+				logger.info("Starting the UI");
+			} catch (IOException e) {
+				logger.severe("Failed to setup the XML file logger, logging to console");
+			}
+			// Start the UI
 			launch(args);
 		}
 	}
@@ -89,7 +102,7 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 		// clear out password
 		Arrays.fill(password, ' ');
 		if (keyStore == null) {
-			System.err.println("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
+			logger.severe("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
 					+ "\" either the keystore does not exist or the password was incorrect");
 			System.exit(1);
 		}

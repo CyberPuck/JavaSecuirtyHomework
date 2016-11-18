@@ -24,27 +24,27 @@ public class ServerSSLSocket {
 		private volatile boolean stop = false;
 		private BlockingQueue<String> messages;
 		ServerUILayoutController controller;
-		
+
 		public QueueReaderThread(BlockingQueue<String> messages, ServerUILayoutController controller) {
 			this.messages = messages;
 			this.controller = controller;
 		}
-		
+
 		@Override
 		public void run() {
-			while(!stop) {
+			while (!stop) {
 				String msg;
-				while((msg = messages.poll()) != null) {
+				while ((msg = messages.poll()) != null) {
 					controller.socketMessage(msg);
 				}
 			}
 		}
-		
+
 		public void terminate() {
 			stop = true;
 		}
 	}
-	
+
 	private int port;
 	private AsynchronousServerSocketChannel connector;
 	private ArrayList<ClientRepresentative> clients;
@@ -53,7 +53,7 @@ public class ServerSSLSocket {
 	private ServerUILayoutController controller;
 	private Thread thread;
 	private QueueReaderThread reader;
-	
+
 	public ServerSSLSocket(int port, BlockingQueue<String> messages, ServerUILayoutController controller) {
 		this.port = port;
 		this.messages = messages;
@@ -62,9 +62,8 @@ public class ServerSSLSocket {
 	}
 
 	public void startServer() throws Exception {
-		connector = AsynchronousServerSocketChannel.open()
-				.bind(new InetSocketAddress(port));
-		
+		connector = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
+
 		// setup the blocking queue reader thread
 		reader = new QueueReaderThread(messages, controller);
 		thread = new Thread(reader);
@@ -76,7 +75,7 @@ public class ServerSSLSocket {
 			@Override
 			public void completed(AsynchronousSocketChannel ch, Void attachment) {
 				// TODO: Log
-				 System.out.println("Client connected!");
+				System.out.println("Client connected!");
 				// handle I/O
 				connector.accept(null, this);
 				// create the client
@@ -86,20 +85,23 @@ public class ServerSSLSocket {
 
 			@Override
 			public void failed(Throwable exc, Void attachment) {
-				System.err.println("Failed to connect: " + exc.getMessage());
-				controller.socketError("Failed to connect: " + exc.getMessage());
+				if (exc != null) {
+					// only log if a failure was thrown
+					System.err.println("Failed to connect: " + exc.getMessage());
+					controller.socketError("Failed to connect: " + exc.getMessage());
+				}
 			}
 		});
 		System.out.println("Ready for clients");
 	}
-	
+
 	public void writeMessage(String message) {
 		// TODO: Need to check clearance levels with the clients
-		for(ClientRepresentative client : this.clients) {
+		for (ClientRepresentative client : this.clients) {
 			client.getSocketChannel().write(ByteBuffer.wrap(message.getBytes()));
 		}
 	}
-	
+
 	public void stop() {
 		try {
 			connector.close();
@@ -107,14 +109,14 @@ public class ServerSSLSocket {
 			System.err.println("Failed to kill server :( " + e.getMessage());
 			controller.socketError("Failed to connect: " + e.getMessage());
 		}
-		
+
 		reader.terminate();
 		try {
 			thread.join();
 		} catch (InterruptedException e1) {
 			System.err.println("FUCKIN' THREADS!!!!!");
 		}
-		for(ClientRepresentative rep : this.clients) {
+		for (ClientRepresentative rep : this.clients) {
 			rep.stop();
 		}
 		// clear out clients
