@@ -1,5 +1,6 @@
 package client;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -14,6 +15,9 @@ public class ClientSSLSocket {
 	private SSLEngine engine;
 	private int port;
 	private String address;
+	private AsynchronousSocketChannel socketChannel;
+	private Thread thread;
+	private ReadThread reader;
 
 	// Threads for async communication
 	private class ReadThread implements Runnable {
@@ -27,6 +31,11 @@ public class ClientSSLSocket {
 
 		public void stop() {
 			stopper = true;
+			try {
+				socketChannel.close();
+			} catch (IOException e) {
+				System.err.println("Failed to stop the client read channel");
+			}
 		}
 
 		@Override
@@ -39,10 +48,10 @@ public class ClientSSLSocket {
 					// wait
 				}
 				int size = 0;
-				try{
+				try {
 					size = f.get();
-				} catch(Exception e) {
-					System.err.println("Unable to get data length");
+				} catch (Exception e) {
+					System.err.println("Unable to get data length: " + e.getMessage() + " :: " + socketChannel.isOpen());
 				}
 				String data = new String(buf.array(), 0, size);
 				System.out.println("RXed: " + data);
@@ -66,16 +75,30 @@ public class ClientSSLSocket {
 		this.port = port;
 	}
 
-	public void run() throws Exception {
+	public void startClient() throws Exception {
 		System.out.println("Client connecting to: " + address + "@" + port);
 		// create the client channel
-		AsynchronousSocketChannel socketChannel = AsynchronousSocketChannel.open();
+		socketChannel = AsynchronousSocketChannel.open();
 		// socketChannel.configureBlocking(false);
 		Future<Void> f = socketChannel.connect(new InetSocketAddress(address, port));
 		f.get();
 		System.out.println("Connected to server");
 		// setup threads
-		Thread reader = new Thread(new ReadThread(socketChannel));
-		reader.start();
+		reader = new ReadThread(socketChannel);
+		thread = new Thread(reader);
+		thread.start();
+	}
+
+	public void writeMessage(String message) {
+		socketChannel.write(ByteBuffer.wrap(message.getBytes()));
+	}
+	
+	public void stop() {
+		try {
+			reader.stop();
+			thread.join();
+		} catch (Exception e) {
+			System.err.println("Failed to stop client reader thread: " + e.getMessage());
+		}
 	}
 }

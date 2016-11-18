@@ -19,7 +19,7 @@ import keyStore.KeyStoreAccessor;
  * 
  * @author Kyle
  */
-public class ClientMain extends Application implements KeystoreAccessInterface{
+public class ClientMain extends Application implements KeystoreAccessInterface {
 	// The title of the UI application
 	private String title = "Secure Chat Client";
 	// command line args that have been parsed
@@ -47,17 +47,18 @@ public class ClientMain extends Application implements KeystoreAccessInterface{
 			// execute the client application
 			// TODO: Move this logic to the UI controller that will establish
 			// the connection
-			// ClientSSLSocket socket = new
-			// ClientSSLSocket(parser.getHostName(), parser.getPort());
-			// try {
-			// socket.run();
-			// long startTime = System.currentTimeMillis();
-			// while (System.currentTimeMillis() - startTime < 60000) {
-			// // do nothing
-			// }
-			// } catch (Exception e) {
-			// System.err.println("Socket err: " + e.getMessage());
-			// }
+//			ClientSSLSocket socket = new ClientSSLSocket("127.0.0.1", 9001);
+//			try {
+//				socket.run();
+//				long startTime = System.currentTimeMillis();
+//				while (System.currentTimeMillis() - startTime < 60000) {
+//					// do nothing
+//				}
+//			} catch (Exception e) {
+//				System.err.println("Socket err: " + e.getMessage());
+//			}
+
+			// Launch the UI
 			launch(args);
 		}
 	}
@@ -75,7 +76,7 @@ public class ClientMain extends Application implements KeystoreAccessInterface{
 		popupController = new KeystoreAccessController(this);
 		popupController.getKeystoreAccessStage().show();
 	}
-	
+
 	@Override
 	public void onLoginRequest(final char[] password) {
 		// Try to open the keystore

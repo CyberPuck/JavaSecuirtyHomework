@@ -18,7 +18,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
-public class ClientUILayoutController implements Initializable {
+public class ClientUILayoutController implements Initializable, ServerLoginPopupInterface {
 	@FXML
 	private Button loginBtn;
 	@FXML
@@ -39,6 +39,8 @@ public class ClientUILayoutController implements Initializable {
 	private Stage clientUIStage;
 	// Controller for the server login pop up
 	private ServerLoginPopupController loginController;
+	// socket for connecting to the server
+	private ClientSSLSocket socket;
 
 	public ClientUILayoutController(Stage primaryStage) {
 		this.clientUIStage = primaryStage;
@@ -73,10 +75,15 @@ public class ClientUILayoutController implements Initializable {
 		loginBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				// run login function
-				loginController.showPopup(true);
-				// disable the login button
-				loginBtn.setDisable(true);
+				if(!connected) {
+					// run login function
+					loginController.showPopup(true);
+					// disable the login button
+					loginBtn.setDisable(true);
+				} else {
+					socket.stop();
+					updateButton();
+				}
 			}
 		});
 
@@ -127,5 +134,25 @@ public class ClientUILayoutController implements Initializable {
 	 */
 	public void loginPopUpUdate(boolean isShown) {
 		loginBtn.setDisable(isShown);
+	}
+
+	@Override
+	public void login(ServerAttributes attr) {
+		this.socket = new ClientSSLSocket(attr.serverName, attr.port);
+		try {
+			this.socket.startClient();
+		} catch(Exception e) {
+			this.rxField.setText(rxField.getText() + "\nError: " + e.getMessage());
+		}
+		connected = true;
+		updateButton();
+	}
+	
+	private void updateButton() {
+		if(connected) {
+			loginBtn.setText("Log out");
+		} else {
+			loginBtn.setText("Log in");
+		}
 	}
 }

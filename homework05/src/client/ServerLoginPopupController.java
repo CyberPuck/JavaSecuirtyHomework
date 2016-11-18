@@ -70,7 +70,7 @@ public class ServerLoginPopupController implements Initializable {
 					// notify the client UI this popup closed
 					clientContoller.loginPopUpUdate(false);
 				}
-			});			
+			});
 		} catch (IOException e) {
 			this.clientContoller.displayMessage("Failed to load server login popup");
 		}
@@ -83,9 +83,15 @@ public class ServerLoginPopupController implements Initializable {
 			@Override
 			public void handle(MouseEvent event) {
 				// run the login function
+				if(isInputFilledIn()) {
+					ServerAttributes attr = new ServerAttributes();
+					attr.serverName = serverAddressField.getText();
+					attr.port = Integer.parseInt(portNumberField.getText());
+					clientContoller.login(attr);
+				}
 			}
 		});
-		
+
 		cancelBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -96,7 +102,7 @@ public class ServerLoginPopupController implements Initializable {
 			}
 		});
 	}
-	
+
 	/**
 	 * Method for showing or hiding the login popup. Controlled by the client
 	 * UI.
@@ -123,4 +129,15 @@ public class ServerLoginPopupController implements Initializable {
 		return displayed;
 	}
 
+	/**
+	 * Check that all inputs have been filled in.
+	 * 
+	 * @return boolean indicating if the inputs in the popup have been filled in
+	 */
+	private boolean isInputFilledIn() {
+		if(serverAddressField.getText().length() > 0 && portNumberField.getText().length() > 0) {
+			return true;
+		}
+		return false;
+	}
 }
