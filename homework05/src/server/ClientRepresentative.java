@@ -28,11 +28,15 @@ public class ClientRepresentative {
 	}
 	
 	public void stop() {
-		reader.stop();
+		
 		try {
+			// kill channel
+			this.socketChannel.close();
+			// kill thread
+			reader.stop();
 			thread.join();
-		} catch (InterruptedException e) {
-			System.err.println("Client THREAD!!!!!!");
+		} catch (Exception e) {
+			System.err.println("Client THREAD ERROR! " + this.name);
 		}
 	}
 

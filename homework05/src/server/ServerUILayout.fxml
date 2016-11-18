@@ -23,7 +23,7 @@
 						<children>
 							<Label layoutX="14.0" layoutY="6.0" text="Received Messages:" />
 							<TextArea fx:id="activityMsgArea" layoutX="14.0" layoutY="23.0" prefHeight="305.0" prefWidth="572.0" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="23.0" />
-							<Label layoutX="14.0" layoutY="340.0" text="Log file is located at:" />
+							<Label layoutX="14.0" layoutY="340.0" text="Log file location:" />
 							<TextField fx:id="activityLogFilefield" layoutX="130.0" layoutY="336.0" prefHeight="25.0" prefWidth="457.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="130.0" AnchorPane.rightAnchor="14.0" />
 						</children>
 					</AnchorPane>

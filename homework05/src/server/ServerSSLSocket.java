@@ -117,5 +117,7 @@ public class ServerSSLSocket {
 		for(ClientRepresentative rep : this.clients) {
 			rep.stop();
 		}
+		// clear out clients
+		this.clients.clear();
 	}
 }
