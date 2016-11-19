@@ -3,7 +3,10 @@ package commonUIElements;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * A thread object given a channel allowing to listen for incoming messages from
@@ -32,23 +35,24 @@ public class SocketReadThread implements Runnable {
 		// Handle reading data until we exit
 		ByteBuffer buf = ByteBuffer.allocate(1024);
 		while (!stopper && socketChannel.isOpen()) {
-			Future<Integer> f = socketChannel.read(buf);
-			while (!f.isDone() && !stopper && socketChannel.isOpen()) {
-				// wait
-			}
-			int size = 0;
+			System.out.println("Reading the socket");
 			try {
-				size = f.get();
-			} catch (Exception e) {
-				System.err.println("Unable to get data length: " + e.getMessage() + " :: " + socketChannel.isOpen());
-				break;
-			}
-			String data = new String(buf.array(), 0, size);
-			System.out.println("RXed: " + data);
-			try {
+				// No input from the user in 60 seconds results in kicking them out
+				int bytesRead = socketChannel.read(buf).get(60, TimeUnit.SECONDS);
+				System.out.println("Got data of size: " + bytesRead);
+
+				String data = new String(buf.array(), 0, bytesRead);
+				System.out.println("RXed: " + data);
+
 				messages.put(data);
 			} catch (InterruptedException e) {
 				System.err.println("Failed to add message to the queue: " + e.getMessage());
+				break;
+			} catch(TimeoutException e) {
+				System.err.println("Timeout hit, waiting again");
+			} catch(ExecutionException e) {
+				System.err.println("Execution error, breaking out of loop");
+				break;
 			}
 		}
 		System.out.println("Exiting thread...");

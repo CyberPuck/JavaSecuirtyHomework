@@ -1,68 +1,29 @@
 package client;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.util.concurrent.Future;
+import java.nio.channels.CompletionHandler;
+import java.util.concurrent.BlockingQueue;
 
 import javax.net.ssl.SSLEngine;
 
-public class ClientSSLSocket {
-	// timeout for client socket to finish the connection
-	private static long TIMEOUT_MS = 5000;
+import commonUIElements.MessageQueueReaderThread;
+import commonUIElements.SocketReadThread;
 
+public class ClientSSLSocket {
 	private SSLEngine engine;
 	private int port;
 	private String address;
 	private AsynchronousSocketChannel socketChannel;
-	private Thread thread;
-	private ReadThread reader;
-
-	// Threads for async communication
-	private class ReadThread implements Runnable {
-
-		private AsynchronousSocketChannel socketChannel;
-		private volatile boolean stopper;
-
-		public ReadThread(AsynchronousSocketChannel ch) {
-			this.socketChannel = ch;
-		}
-
-		public void stop() {
-			stopper = true;
-			try {
-				socketChannel.close();
-			} catch (IOException e) {
-				System.err.println("Failed to stop the client read channel");
-			}
-		}
-
-		@Override
-		public void run() {
-			// Handle reading data until we exit
-			ByteBuffer buf = ByteBuffer.allocate(1024);
-			while (!stopper && socketChannel.isOpen()) {
-				Future<Integer> f = socketChannel.read(buf);
-				while (!f.isDone() && !stopper) {
-					// wait
-				}
-				int size = 0;
-				try {
-					size = f.get();
-				} catch (Exception e) {
-					System.err.println("Unable to get data length: " + e.getMessage() + " :: " + socketChannel.isOpen());
-					break;
-				}
-				String data = new String(buf.array(), 0, size);
-				System.out.println("RXed: " + data);
-				if (data.equals("hello")) {
-					socketChannel.write(ByteBuffer.wrap("HI!".getBytes()));
-				}
-			}
-			System.out.println("Exiting thread...");
-		}
-	}
+	private ClientUILayoutController controller;
+	private Thread msgThread;
+	// Reads messages from the queue
+	private MessageQueueReaderThread msgReader;
+	private BlockingQueue<String> messages;
+	// Reads messages from the socket
+	private SocketReadThread socketReader;
+	private Thread socketThread;
 
 	/**
 	 * Setup the SSL engine, involves opening trust and key stores, and defining
@@ -71,23 +32,39 @@ public class ClientSSLSocket {
 	 * @param address
 	 * @param port
 	 */
-	public ClientSSLSocket(String address, int port) {
+	public ClientSSLSocket(String address, int port, BlockingQueue<String> messages, ClientUILayoutController clientController) {
 		this.address = address;
 		this.port = port;
+		this.messages = messages;
+		this.controller = clientController;
 	}
 
 	public void startClient() throws Exception {
 		System.out.println("Client connecting to: " + address + "@" + port);
 		// create the client channel
-		socketChannel = AsynchronousSocketChannel.open();
+		this.socketChannel = AsynchronousSocketChannel.open();
 		// socketChannel.configureBlocking(false);
-		Future<Void> f = socketChannel.connect(new InetSocketAddress(address, port));
-		f.get();
-		System.out.println("Connected to server");
-		// setup threads
-		reader = new ReadThread(socketChannel);
-		thread = new Thread(reader);
-		thread.start();
+		socketChannel.connect(new InetSocketAddress(address, port), this.socketChannel, new CompletionHandler<Void, AsynchronousSocketChannel>() {
+
+			@Override
+			public void completed(Void result, AsynchronousSocketChannel ch) {
+				System.out.println("Connected to server");
+				// setup threads
+				// setup the socket reader
+				socketReader = new SocketReadThread(socketChannel, messages);
+				socketThread = new Thread(socketReader);
+				socketThread.start();
+				// setup the message reader
+				msgReader = new MessageQueueReaderThread(messages, controller);
+				msgThread = new Thread(msgReader);
+				msgThread.start();
+			}
+
+			@Override
+			public void failed(Throwable exc, AsynchronousSocketChannel ch) {
+				System.err.println("Failed to connect to server");
+			}
+		});
 	}
 
 	public void writeMessage(String message) {
@@ -96,8 +73,14 @@ public class ClientSSLSocket {
 	
 	public void stop() {
 		try {
-			reader.stop();
-			thread.join();
+			// kill the socket
+			this.socketChannel.close();
+			// kill the socket reader
+			this.socketReader.stop();
+			this.socketThread.join();
+			this.msgReader.stop();
+			this.msgThread.interrupt();
+			this.msgThread.join();
 		} catch (Exception e) {
 			System.err.println("Failed to stop client reader thread: " + e.getMessage());
 		}

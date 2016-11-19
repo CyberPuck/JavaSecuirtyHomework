@@ -3,7 +3,10 @@ package client;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
+import commonUIElements.SocketResponseInterface;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -19,7 +22,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class ClientUILayoutController implements Initializable, ServerLoginPopupInterface {
+public class ClientUILayoutController implements Initializable, ServerLoginPopupInterface, SocketResponseInterface {
 	@FXML
 	private Button loginBtn;
 	@FXML
@@ -42,6 +45,8 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	private ServerLoginPopupController loginController;
 	// socket for connecting to the server
 	private ClientSSLSocket socket;
+	// message queue
+	private BlockingQueue<String> messages = new ArrayBlockingQueue<String>(5);
 
 	public ClientUILayoutController(Stage primaryStage) {
 		this.clientUIStage = primaryStage;
@@ -154,7 +159,7 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 
 	@Override
 	public void login(ServerAttributes attr) {
-		this.socket = new ClientSSLSocket(attr.serverName, attr.port);
+		this.socket = new ClientSSLSocket(attr.serverName, attr.port, messages, this);
 		try {
 			this.socket.startClient();
 		} catch(Exception e) {
@@ -172,5 +177,17 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 			loginBtn.setText("Log in");
 			sendMsgBtn.setDisable(true);
 		}
+	}
+
+	@Override
+	public void socketMessage(String message) {
+		// write out a socket message
+		rxField.setText(rxField.getText() + "\n" + message);
+	}
+
+	@Override
+	public void socketError(String error) {
+		// write out an error
+		rxField.setText(rxField.getText() + "\nError: " + error);
 	}
 }
