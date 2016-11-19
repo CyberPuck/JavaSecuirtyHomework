@@ -10,6 +10,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -87,7 +88,15 @@ public class KeystoreAccessController implements Initializable {
 				handleLoginRequest();
 			}
 		});
-
+		// enter was hit in the password box, behave like the login button
+		this.keystorePasswordField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if(event.getCode() == KeyCode.ENTER) {
+					handleLoginRequest();
+				}
+			}
+		});
 	}
 
 	/**

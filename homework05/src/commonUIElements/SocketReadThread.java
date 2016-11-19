@@ -33,7 +33,7 @@ public class SocketReadThread implements Runnable {
 		ByteBuffer buf = ByteBuffer.allocate(1024);
 		while (!stopper && socketChannel.isOpen()) {
 			Future<Integer> f = socketChannel.read(buf);
-			while (!f.isDone() && !stopper) {
+			while (!f.isDone() && !stopper && socketChannel.isOpen()) {
 				// wait
 			}
 			int size = 0;
@@ -41,10 +41,15 @@ public class SocketReadThread implements Runnable {
 				size = f.get();
 			} catch (Exception e) {
 				System.err.println("Unable to get data length: " + e.getMessage() + " :: " + socketChannel.isOpen());
+				break;
 			}
 			String data = new String(buf.array(), 0, size);
 			System.out.println("RXed: " + data);
-			messages.add(data);
+			try {
+				messages.put(data);
+			} catch (InterruptedException e) {
+				System.err.println("Failed to add message to the queue: " + e.getMessage());
+			}
 		}
 		System.out.println("Exiting thread...");
 	}
