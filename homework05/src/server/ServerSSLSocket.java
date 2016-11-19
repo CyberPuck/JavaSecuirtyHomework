@@ -34,10 +34,20 @@ public class ServerSSLSocket {
 		public void run() {
 			while (!stop) {
 				String msg;
-				while ((msg = messages.poll()) != null) {
-					controller.socketMessage(msg);
+				try{
+					System.out.println("Waiting on a message");
+					msg = messages.take();
+					if(msg != null) {
+						controller.socketMessage(msg);
+					}
+				} catch(InterruptedException e) {
+					System.err.println("Queue thread Error: " + e.getMessage());
 				}
+//				while ((msg = messages.poll()) != null) {
+//					controller.socketMessage(msg);
+//				}
 			}
+			System.out.println("Exiting...");
 		}
 
 		public void terminate() {
@@ -95,10 +105,12 @@ public class ServerSSLSocket {
 		System.out.println("Ready for clients");
 	}
 
-	public void writeMessage(String message) {
+	public void writeMessage(String message, String clientName) {
 		// TODO: Need to check clearance levels with the clients
 		for (ClientRepresentative client : this.clients) {
-			client.getSocketChannel().write(ByteBuffer.wrap(message.getBytes()));
+			if (!client.getName().equals(clientName)) {
+				client.getSocketChannel().write(ByteBuffer.wrap(message.getBytes()));
+			}
 		}
 	}
 
@@ -109,9 +121,11 @@ public class ServerSSLSocket {
 			System.err.println("Failed to kill server :( " + e.getMessage());
 			controller.socketError("Failed to connect: " + e.getMessage());
 		}
-
+		System.out.println("connector closed");
 		reader.terminate();
 		try {
+			thread.interrupt();
+			System.out.println("Waiting on reader to stop");
 			thread.join();
 		} catch (InterruptedException e1) {
 			System.err.println("FUCKIN' THREADS!!!!!");
@@ -119,6 +133,7 @@ public class ServerSSLSocket {
 		for (ClientRepresentative rep : this.clients) {
 			rep.stop();
 		}
+		System.out.println("Waiting on clients");
 		// clear out clients
 		this.clients.clear();
 	}

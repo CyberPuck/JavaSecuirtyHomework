@@ -23,6 +23,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class ServerUILayoutController implements Initializable, SocketResponseInterface{
 	@FXML
@@ -156,6 +157,17 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 				}
 				// toggle boolean
 				serverOnline = !serverOnline;
+			}
+		});
+		// handle the close button
+		serverUIStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent event) {
+				// if the server is online, close all connections
+				if(serverOnline) {
+					serverSSLSocket.stop();
+					serverOnline = !serverOnline;
+				}
 			}
 		});
 	}
