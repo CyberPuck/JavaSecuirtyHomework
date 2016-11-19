@@ -43,8 +43,10 @@ public class SocketReadThread implements Runnable {
 
 				String data = new String(buf.array(), 0, bytesRead);
 				System.out.println("RXed: " + data);
-
+				// add data to the message queue
 				messages.put(data);
+				// clear the buffer for the next message
+				buf.clear();
 			} catch (InterruptedException e) {
 				System.err.println("Failed to add message to the queue: " + e.getMessage());
 				break;

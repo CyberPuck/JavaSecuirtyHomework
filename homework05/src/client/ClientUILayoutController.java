@@ -81,15 +81,17 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 		loginBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if(!connected) {
+				if (!connected) {
 					// run login function
 					loginController.showPopup(true);
 					// disable the login button
 					loginBtn.setDisable(true);
+					connected = true;
 				} else {
 					socket.stop();
-					updateButtons();
+					connected = false;
 				}
+				updateButtons();
 			}
 		});
 
@@ -135,7 +137,7 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 			@Override
 			public void handle(WindowEvent event) {
 				// close socket if open
-				if(connected) {
+				if (connected) {
 					socket.stop();
 					connected = !connected;
 				}
@@ -162,15 +164,15 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 		this.socket = new ClientSSLSocket(attr.serverName, attr.port, messages, this);
 		try {
 			this.socket.startClient();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			this.rxField.setText(rxField.getText() + "\nError: " + e.getMessage());
 		}
 		connected = true;
 		updateButtons();
 	}
-	
+
 	private void updateButtons() {
-		if(connected) {
+		if (connected) {
 			loginBtn.setText("Log out");
 			sendMsgBtn.setDisable(false);
 		} else {

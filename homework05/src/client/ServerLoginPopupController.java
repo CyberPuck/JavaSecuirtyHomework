@@ -99,8 +99,6 @@ public class ServerLoginPopupController implements Initializable {
 			public void handle(MouseEvent event) {
 				// hide the pop up
 				showPopup(false);
-				// TODO: Does the controller need to see this?
-				clientContoller.loginPopUpUdate(false);
 			}
 		});
 	}
@@ -120,6 +118,8 @@ public class ServerLoginPopupController implements Initializable {
 			this.controllerStage.hide();
 			this.displayed = false;
 		}
+		// disable/enable client UI log in button
+		clientContoller.loginPopUpUdate(showPopup);
 	}
 
 	/**
