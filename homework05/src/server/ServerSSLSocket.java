@@ -8,8 +8,8 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+
+import commonUIElements.MessageQueueReaderThread;
 
 /**
  * Handles creating the server socket, listening for SSL clients on the port
@@ -19,50 +19,15 @@ import java.util.concurrent.Future;
  *
  */
 public class ServerSSLSocket {
-	private class QueueReaderThread implements Runnable {
-
-		private volatile boolean stop = false;
-		private BlockingQueue<String> messages;
-		ServerUILayoutController controller;
-
-		public QueueReaderThread(BlockingQueue<String> messages, ServerUILayoutController controller) {
-			this.messages = messages;
-			this.controller = controller;
-		}
-
-		@Override
-		public void run() {
-			while (!stop) {
-				String msg;
-				try{
-					System.out.println("Waiting on a message");
-					msg = messages.take();
-					if(msg != null) {
-						controller.socketMessage(msg);
-					}
-				} catch(InterruptedException e) {
-					System.err.println("Queue thread Error: " + e.getMessage());
-				}
-//				while ((msg = messages.poll()) != null) {
-//					controller.socketMessage(msg);
-//				}
-			}
-			System.out.println("Exiting...");
-		}
-
-		public void terminate() {
-			stop = true;
-		}
-	}
-
 	private int port;
 	private AsynchronousServerSocketChannel connector;
 	private ArrayList<ClientRepresentative> clients;
 	private BlockingQueue<String> messages;
 	// needed to respond to UI
 	private ServerUILayoutController controller;
-	private Thread thread;
-	private QueueReaderThread reader;
+	private Thread msgThread;
+	private MessageQueueReaderThread msgReader;
+	
 
 	public ServerSSLSocket(int port, BlockingQueue<String> messages, ServerUILayoutController controller) {
 		this.port = port;
@@ -75,9 +40,9 @@ public class ServerSSLSocket {
 		connector = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
 
 		// setup the blocking queue reader thread
-		reader = new QueueReaderThread(messages, controller);
-		thread = new Thread(reader);
-		thread.start();
+		msgReader = new MessageQueueReaderThread(messages, controller);
+		msgThread = new Thread(msgReader);
+		msgThread.start();
 
 		// accept incoming clients
 		connector.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
@@ -99,6 +64,8 @@ public class ServerSSLSocket {
 					// only log if a failure was thrown
 					System.err.println("Failed to connect: " + exc.getMessage());
 					controller.socketError("Failed to connect: " + exc.getMessage());
+				} else {
+					System.out.println("Random failed event?");
 				}
 			}
 		});
@@ -107,6 +74,7 @@ public class ServerSSLSocket {
 
 	public void writeMessage(String message, String clientName) {
 		// TODO: Need to check clearance levels with the clients
+		System.out.println("Writing messages");
 		for (ClientRepresentative client : this.clients) {
 			if (!client.getName().equals(clientName)) {
 				client.getSocketChannel().write(ByteBuffer.wrap(message.getBytes()));
@@ -122,11 +90,11 @@ public class ServerSSLSocket {
 			controller.socketError("Failed to connect: " + e.getMessage());
 		}
 		System.out.println("connector closed");
-		reader.terminate();
+		msgReader.stop();
 		try {
-			thread.interrupt();
+			msgThread.interrupt();
 			System.out.println("Waiting on reader to stop");
-			thread.join();
+			msgThread.join();
 		} catch (InterruptedException e1) {
 			System.err.println("FUCKIN' THREADS!!!!!");
 		}
