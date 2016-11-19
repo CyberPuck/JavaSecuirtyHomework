@@ -21,6 +21,7 @@ public class ClientRepresentative {
 	private Thread thread;
 	
 	public ClientRepresentative(AsynchronousSocketChannel ch, String name, BlockingQueue<String> messages) {
+		this.socketChannel = ch;
 		this.name = name;
 		reader = new SocketReadThread(ch, messages);
 		thread = new Thread(reader);
