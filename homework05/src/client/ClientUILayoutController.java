@@ -17,6 +17,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 public class ClientUILayoutController implements Initializable, ServerLoginPopupInterface {
 	@FXML
@@ -82,7 +83,7 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 					loginBtn.setDisable(true);
 				} else {
 					socket.stop();
-					updateButton();
+					updateButtons();
 				}
 			}
 		});
@@ -108,7 +109,11 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 				// run send message function
 				if (connected) {
 					// only send a message if we are connected
-					// TODO: Send message
+					// get the required fields for the message
+					String classification = "Level: " + clearanceComboBox.getValue();
+					socket.writeMessage(classification + msgField.getText());
+					// clear out the message field
+					msgField.clear();
 				}
 			}
 		});
@@ -118,6 +123,17 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				rxField.setScrollTop(Double.MAX_VALUE);
+			}
+		});
+		// handle the close event
+		clientUIStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+			@Override
+			public void handle(WindowEvent event) {
+				// close socket if open
+				if(connected) {
+					socket.stop();
+					connected = !connected;
+				}
 			}
 		});
 	}
@@ -145,14 +161,16 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 			this.rxField.setText(rxField.getText() + "\nError: " + e.getMessage());
 		}
 		connected = true;
-		updateButton();
+		updateButtons();
 	}
 	
-	private void updateButton() {
+	private void updateButtons() {
 		if(connected) {
 			loginBtn.setText("Log out");
+			sendMsgBtn.setDisable(false);
 		} else {
 			loginBtn.setText("Log in");
+			sendMsgBtn.setDisable(true);
 		}
 	}
 }

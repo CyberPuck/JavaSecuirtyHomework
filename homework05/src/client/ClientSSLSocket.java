@@ -52,6 +52,7 @@ public class ClientSSLSocket {
 					size = f.get();
 				} catch (Exception e) {
 					System.err.println("Unable to get data length: " + e.getMessage() + " :: " + socketChannel.isOpen());
+					break;
 				}
 				String data = new String(buf.array(), 0, size);
 				System.out.println("RXed: " + data);

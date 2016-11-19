@@ -88,6 +88,8 @@ public class ServerLoginPopupController implements Initializable {
 					attr.serverName = serverAddressField.getText();
 					attr.port = Integer.parseInt(portNumberField.getText());
 					clientContoller.login(attr);
+					// hide the pop up
+					showPopup(false);
 				}
 			}
 		});
