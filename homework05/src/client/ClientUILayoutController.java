@@ -6,6 +6,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import commonUIElements.Message;
 import commonUIElements.SocketResponseInterface;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -46,7 +47,7 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	// socket for connecting to the server
 	private ClientSSLSocket socket;
 	// message queue
-	private BlockingQueue<String> messages = new ArrayBlockingQueue<String>(5);
+	private BlockingQueue<Message> messages = new ArrayBlockingQueue<>(5);
 
 	public ClientUILayoutController(Stage primaryStage) {
 		this.clientUIStage = primaryStage;
@@ -117,8 +118,7 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 				if (connected) {
 					// only send a message if we are connected
 					// get the required fields for the message
-					String classification = "Level: " + clearanceComboBox.getValue();
-					socket.writeMessage(classification + msgField.getText());
+					socket.writeMessage(clearanceComboBox.getValue() + msgField.getText());
 					// clear out the message field
 					msgField.clear();
 				}
@@ -182,9 +182,9 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	}
 
 	@Override
-	public void socketMessage(String message) {
+	public void socketMessage(Message message) {
 		// write out a socket message
-		rxField.setText(rxField.getText() + "\n" + message);
+		rxField.setText(rxField.getText() + "\n" + message.senderName + "@" + message.clearance + ": " + message.message);
 	}
 
 	@Override

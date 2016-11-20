@@ -9,6 +9,7 @@ import java.nio.channels.CompletionHandler;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
+import commonUIElements.Message;
 import commonUIElements.MessageQueueReaderThread;
 
 /**
@@ -22,14 +23,14 @@ public class ServerSSLSocket {
 	private int port;
 	private AsynchronousServerSocketChannel connector;
 	private ArrayList<ClientRepresentative> clients;
-	private BlockingQueue<String> messages;
+	private BlockingQueue<Message> messages;
 	// needed to respond to UI
 	private ServerUILayoutController controller;
 	private Thread msgThread;
 	private MessageQueueReaderThread msgReader;
 	
 
-	public ServerSSLSocket(int port, BlockingQueue<String> messages, ServerUILayoutController controller) {
+	public ServerSSLSocket(int port, BlockingQueue<Message> messages, ServerUILayoutController controller) {
 		this.port = port;
 		this.messages = messages;
 		this.controller = controller;
@@ -72,12 +73,13 @@ public class ServerSSLSocket {
 		System.out.println("Ready for clients");
 	}
 
-	public void writeMessage(String message, String clientName) {
+	public void writeMessage(Message message) {
 		// TODO: Need to check clearance levels with the clients
 		System.out.println("Writing messages");
 		for (ClientRepresentative client : this.clients) {
-			if (!client.getName().equals(clientName)) {
-				client.getSocketChannel().write(ByteBuffer.wrap(message.getBytes()));
+			if (!client.getName().equals(message.senderName)) {
+				String msg = message.clearance + message.message;
+				client.getSocketChannel().write(ByteBuffer.wrap(msg.getBytes()));
 			}
 		}
 	}

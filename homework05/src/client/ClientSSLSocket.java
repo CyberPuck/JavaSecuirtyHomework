@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import javax.net.ssl.SSLEngine;
 
+import commonUIElements.Message;
 import commonUIElements.MessageQueueReaderThread;
 import commonUIElements.SocketReadThread;
 
@@ -20,7 +21,7 @@ public class ClientSSLSocket {
 	private Thread msgThread;
 	// Reads messages from the queue
 	private MessageQueueReaderThread msgReader;
-	private BlockingQueue<String> messages;
+	private BlockingQueue<Message> messages;
 	// Reads messages from the socket
 	private SocketReadThread socketReader;
 	private Thread socketThread;
@@ -32,7 +33,7 @@ public class ClientSSLSocket {
 	 * @param address
 	 * @param port
 	 */
-	public ClientSSLSocket(String address, int port, BlockingQueue<String> messages, ClientUILayoutController clientController) {
+	public ClientSSLSocket(String address, int port, BlockingQueue<Message> messages, ClientUILayoutController clientController) {
 		this.address = address;
 		this.port = port;
 		this.messages = messages;
@@ -51,7 +52,7 @@ public class ClientSSLSocket {
 				System.out.println("Connected to server");
 				// setup threads
 				// setup the socket reader
-				socketReader = new SocketReadThread(socketChannel, messages);
+				socketReader = new SocketReadThread(socketChannel, messages, "Server");
 				socketThread = new Thread(socketReader);
 				socketThread.start();
 				// setup the message reader

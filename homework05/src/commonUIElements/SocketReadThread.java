@@ -1,10 +1,10 @@
 package commonUIElements;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -18,11 +18,13 @@ import java.util.concurrent.TimeoutException;
 public class SocketReadThread implements Runnable {
 	private AsynchronousSocketChannel socketChannel;
 	private volatile boolean stopper;
-	private BlockingQueue<String> messages;
+	private BlockingQueue<Message> messages;
+	private String name;
 
-	public SocketReadThread(AsynchronousSocketChannel ch, BlockingQueue<String> messages) {
+	public SocketReadThread(AsynchronousSocketChannel ch, BlockingQueue<Message> messages, String name) {
 		this.socketChannel = ch;
 		this.messages = messages;
+		this.name = name;
 	}
 
 	public void stop() {
@@ -44,7 +46,7 @@ public class SocketReadThread implements Runnable {
 				String data = new String(buf.array(), 0, bytesRead);
 				System.out.println("RXed: " + data);
 				// add data to the message queue
-				messages.put(data);
+				messages.put(new Message(name, data.substring(1), "", Integer.parseInt(data.substring(0, 1))));
 				// clear the buffer for the next message
 				buf.clear();
 			} catch (InterruptedException e) {
@@ -56,6 +58,11 @@ public class SocketReadThread implements Runnable {
 				System.err.println("Execution error, breaking out of loop");
 				break;
 			}
+		}
+		try {
+			socketChannel.close();
+		} catch (IOException e) {
+			System.err.println("Failed to close socket while exiting");
 		}
 		System.out.println("Exiting thread...");
 	}

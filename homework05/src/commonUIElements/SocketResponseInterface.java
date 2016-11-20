@@ -14,9 +14,9 @@ public interface SocketResponseInterface {
 	 * Message from the socket.
 	 * 
 	 * @param message
-	 *            string
+	 *            Message
 	 */
-	public void socketMessage(String message);
+	public void socketMessage(Message message);
 
 	/**
 	 * Error from the socket.

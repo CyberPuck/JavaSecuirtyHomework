@@ -27,6 +27,8 @@ public class KeystoreAccessController implements Initializable {
 	@FXML
 	private PasswordField keystorePasswordField;
 	@FXML
+	private PasswordField truststorePasswordField;
+	@FXML
 	private Button unlockKeystoreBtn;
 	// The stage context, will be used to show this pop up
 	private Stage keystoreAccessStage;
@@ -92,7 +94,16 @@ public class KeystoreAccessController implements Initializable {
 		this.keystorePasswordField.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
-				if(event.getCode() == KeyCode.ENTER) {
+				if (event.getCode() == KeyCode.ENTER) {
+					handleLoginRequest();
+				}
+			}
+		});
+		// enter was hit in the password box, behave like the login button
+		this.truststorePasswordField.setOnKeyPressed(new EventHandler<KeyEvent>() {
+			@Override
+			public void handle(KeyEvent event) {
+				if (event.getCode() == KeyCode.ENTER) {
 					handleLoginRequest();
 				}
 			}
@@ -105,8 +116,9 @@ public class KeystoreAccessController implements Initializable {
 	 */
 	private void handleLoginRequest() {
 		// give the password to client main
-		this.main.onLoginRequest(this.keystorePasswordField.getText().toCharArray());
+		this.main.onLoginRequest(this.keystorePasswordField.getText().toCharArray(), this.truststorePasswordField.getText().toCharArray());
 		// clear out JavaFX password field
 		this.keystorePasswordField.clear();
+		this.truststorePasswordField.clear();
 	}
 }

@@ -3,6 +3,7 @@ package server;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.BlockingQueue;
 
+import commonUIElements.Message;
 import commonUIElements.SocketReadThread;
 
 /**
@@ -20,10 +21,10 @@ public class ClientRepresentative {
 	private SocketReadThread reader;
 	private Thread thread;
 	
-	public ClientRepresentative(AsynchronousSocketChannel ch, String name, BlockingQueue<String> messages) {
+	public ClientRepresentative(AsynchronousSocketChannel ch, String name, BlockingQueue<Message> messages) {
 		this.socketChannel = ch;
 		this.name = name;
-		reader = new SocketReadThread(ch, messages);
+		reader = new SocketReadThread(ch, messages, name);
 		thread = new Thread(reader);
 		thread.start();
 	}

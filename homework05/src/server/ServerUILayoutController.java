@@ -9,6 +9,7 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import commonUIElements.Message;
 import commonUIElements.SocketResponseInterface;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -60,7 +61,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	private String settingsFile;
 	private FileChooser fileChooser = new FileChooser();
 	private ServerSSLSocket serverSSLSocket;
-	private BlockingQueue<String> messages = new ArrayBlockingQueue<String>(5);
+	private BlockingQueue<Message> messages = new ArrayBlockingQueue<>(5);
 	// TODO: Implement server start up popup
 	
 	public ServerUILayoutController(Stage primaryStage, Properties settings, String settingsFile) {
@@ -173,9 +174,10 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	}
 
 	@Override
-	public void socketMessage(String message) {
+	public void socketMessage(Message message) {
 		System.out.println("Msg from client: " + message);
-		activityMsgArea.setText(activityMsgArea.getText() + message + "\n");
+		activityMsgArea.setText(activityMsgArea.getText() + "\n" + message.senderName + "@" + message.clearance + ": " + message.message);
+		this.serverSSLSocket.writeMessage(message);
 	}
 
 	@Override

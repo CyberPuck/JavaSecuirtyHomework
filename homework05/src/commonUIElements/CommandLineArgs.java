@@ -9,6 +9,8 @@ package commonUIElements;
 public class CommandLineArgs {
 	// Location of the keystore
 	private String keystoreLocation = ".keystore";
+	// Location of the trust store
+	private String trustStoreLocation = ".truststore";
 	// name of the program running
 	private String mainName = "unknown";
 	// location of the settings file
@@ -44,6 +46,8 @@ public class CommandLineArgs {
 			case "-s":
 				settingsLocation = args[++i];
 				break;
+			case "-t":
+				trustStoreLocation = args[++i];
 			case "--help": // print help and stop execution
 				printHelp();
 				return false;
@@ -65,7 +69,8 @@ public class CommandLineArgs {
 				mainName + " can take no input which results in assuming the keystore is located at: ./.keystore");
 		System.out.println("Expected format: java " + mainName + "Main [<flag> <arg>]");
 		System.out.println("Example: java " + mainName + "Main -k ../awesome.keystore");
-		System.out.println("<-k>   Custom location of the keystore, default=./.keystore");
+		System.out.println("<-k>   Custom location of the key store, default=./.keystore");
+		System.out.println("<-t>   Custom location of the trust store, default=./.truststore");
 		System.out.println("<-s>   Custom location of the settings file, default=./.settings");
 
 	}
@@ -97,5 +102,14 @@ public class CommandLineArgs {
 	 */
 	public void setSettings(String settings) {
 		this.settingsLocation = settings;
+	}
+
+	/**
+	 * Get the location of the trust store.
+	 * 
+	 * @return String representing the path to the trust store.
+	 */
+	public String getTrustStoreLocation() {
+		return trustStoreLocation;
 	}
 }

@@ -4,10 +4,10 @@ import java.util.concurrent.BlockingQueue;
 
 public class MessageQueueReaderThread implements Runnable{
 	private volatile boolean stop = false;
-	private BlockingQueue<String> messages;
+	private BlockingQueue<Message> messages;
 	SocketResponseInterface controller;
 
-	public MessageQueueReaderThread(BlockingQueue<String> messages, SocketResponseInterface controller) {
+	public MessageQueueReaderThread(BlockingQueue<Message> messages, SocketResponseInterface controller) {
 		this.messages = messages;
 		this.controller = controller;
 	}
@@ -15,7 +15,7 @@ public class MessageQueueReaderThread implements Runnable{
 	@Override
 	public void run() {
 		while (!stop) {
-			String msg;
+			Message msg;
 			try {
 				System.out.println("Waiting on a message");
 				msg = messages.take();

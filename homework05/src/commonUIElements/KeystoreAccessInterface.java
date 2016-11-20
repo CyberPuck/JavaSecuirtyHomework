@@ -8,11 +8,13 @@ package commonUIElements;
  */
 public interface KeystoreAccessInterface {
 	/**
-	 * Function allowing the password to the keystore to be passed to the
-	 * primary controller class.
+	 * Function allowing the password to the key store and trust store to be
+	 * passed to the primary controller class.
 	 * 
-	 * @param password
-	 *            to the keystore
+	 * @param keyStorePassword
+	 *            to the key store
+	 * @param trustStorePassword
+	 *            to the trust store
 	 */
-	public void onLoginRequest(char[] password);
+	public void onLoginRequest(char[] keyStorePassword, char[] trustStorePassword);
 }
