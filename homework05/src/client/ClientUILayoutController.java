@@ -146,7 +146,7 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	}
 
 	public void displayMessage(String message) {
-		this.rxField.setText(this.rxField.getText() + "\n" + message);
+		this.rxField.setText(this.rxField.getText() + message + "\n");
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 		try {
 			this.socket.startClient();
 		} catch (Exception e) {
-			this.rxField.setText(rxField.getText() + "\nError: " + e.getMessage());
+			this.rxField.setText(rxField.getText() + "Error: " + e.getMessage() + "\n");
 		}
 		connected = true;
 		updateButtons();
@@ -184,12 +184,13 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	@Override
 	public void socketMessage(Message message) {
 		// write out a socket message
-		rxField.setText(rxField.getText() + "\n" + message.senderName + "@" + message.clearance + ": " + message.message);
+		rxField.setText(
+				rxField.getText() + message.senderName + "@" + message.clearance + ": " + message.message + "\n");
 	}
 
 	@Override
 	public void socketError(String error) {
 		// write out an error
-		rxField.setText(rxField.getText() + "\nError: " + error);
+		rxField.setText(rxField.getText() + "Error: " + error + "\n");
 	}
 }

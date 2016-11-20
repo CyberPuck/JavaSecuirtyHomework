@@ -176,7 +176,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	@Override
 	public void socketMessage(Message message) {
 		System.out.println("Msg from client: " + message);
-		activityMsgArea.setText(activityMsgArea.getText() + "\n" + message.senderName + "@" + message.clearance + ": " + message.message);
+		activityMsgArea.setText(activityMsgArea.getText() + message.senderName + "@" + message.clearance + ": " + message.message + "\n");
 		this.serverSSLSocket.writeMessage(message);
 	}
 
