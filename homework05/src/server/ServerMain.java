@@ -96,13 +96,14 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 	}
 
 	@Override
-	public void onLoginRequest(final char[] keystorePassword, final char[] truststorePassword) {
-		// Try to open the keystore
-		KeyStore keyStore = KeyStoreAccessor.getKeyStore(keystorePassword, parser.getKeystoreLocation());
-		// TODO: Update trust store in command line args
-		KeyStore trustStore = KeyStoreAccessor.getKeyStore(truststorePassword, parser.getTrustStoreLocation());
+	public void onLoginRequest(final char[] keyStorePassword, final char[] trustStorePassword) {
+		// Try to open the key store
+		KeyStore keyStore = KeyStoreAccessor.getKeyStore(keyStorePassword, parser.getKeystoreLocation());
+		// Try to open the trust store
+		KeyStore trustStore = KeyStoreAccessor.getKeyStore(trustStorePassword, parser.getTrustStoreLocation());
 		// clear out password
-		Arrays.fill(keystorePassword, ' ');
+		Arrays.fill(keyStorePassword, ' ');
+		Arrays.fill(trustStorePassword, ' ');
 		if (keyStore == null) {
 			logger.severe("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
 					+ "\" either the keystore does not exist or the password was incorrect");

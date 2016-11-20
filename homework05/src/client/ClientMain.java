@@ -1,18 +1,16 @@
 package client;
 
-import java.io.IOException;
 import java.security.KeyStore;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 import commonUIElements.CommandLineArgs;
 import commonUIElements.KeystoreAccessController;
 import commonUIElements.KeystoreAccessInterface;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import keyStore.KeyStoreAccessor;
+import server.ServerMain;
 
 /**
  * Entry point for the client that communicates with the server.
@@ -31,6 +29,8 @@ public class ClientMain extends Application implements KeystoreAccessInterface {
 	private KeystoreAccessController popupController;
 	// controller for the primary UI
 	private ClientUILayoutController clientController;
+	// logger
+	private static Logger logger = Logger.getLogger(ServerMain.class.getName());
 
 	/**
 	 * Entry point for the application, takes in command line args and spins up
@@ -78,14 +78,22 @@ public class ClientMain extends Application implements KeystoreAccessInterface {
 	}
 
 	@Override
-	public void onLoginRequest(final char[] password) {
+	public void onLoginRequest(final char[] keyStorePassword, final char[] trustStorePassword) {
 		// Try to open the keystore
-		KeyStore keyStore = KeyStoreAccessor.getKeyStore(password, parser.getKeystoreLocation());
+		KeyStore keyStore = KeyStoreAccessor.getKeyStore(keyStorePassword, parser.getKeystoreLocation());
+		// Try to open the trust store
+				KeyStore trustStore = KeyStoreAccessor.getKeyStore(trustStorePassword, parser.getTrustStoreLocation());
 		// clear out password
-		Arrays.fill(password, ' ');
+		Arrays.fill(keyStorePassword, ' ');
+		Arrays.fill(trustStorePassword, ' ');
 		if (keyStore == null) {
-			System.err.println("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
+			logger.severe("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
 					+ "\" either the keystore does not exist or the password was incorrect");
+			System.exit(1);
+		}
+		if (trustStore == null) {
+			logger.severe("Trust store failed to open at:  \"" + parser.getTrustStoreLocation()
+					+ "\" either the trust store does not exist or the password was incorrect");
 			System.exit(1);
 		}
 		// remove the popup UI

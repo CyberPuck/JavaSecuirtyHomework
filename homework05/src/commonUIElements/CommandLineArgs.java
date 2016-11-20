@@ -48,6 +48,7 @@ public class CommandLineArgs {
 				break;
 			case "-t":
 				trustStoreLocation = args[++i];
+			break;
 			case "--help": // print help and stop execution
 				printHelp();
 				return false;
@@ -65,8 +66,6 @@ public class CommandLineArgs {
 	 */
 	private void printHelp() {
 		System.out.println("\n\n" + mainName + "  ");
-		System.out.println(
-				mainName + " can take no input which results in assuming the keystore is located at: ./.keystore");
 		System.out.println("Expected format: java " + mainName + "Main [<flag> <arg>]");
 		System.out.println("Example: java " + mainName + "Main -k ../awesome.keystore");
 		System.out.println("<-k>   Custom location of the key store, default=./.keystore");
