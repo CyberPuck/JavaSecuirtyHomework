@@ -8,6 +8,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 /**
  * A thread object given a channel allowing to listen for incoming messages from
  * a socket.
@@ -42,11 +44,11 @@ public class SocketReadThread implements Runnable {
 				// No input from the user in 60 seconds results in kicking them out
 				int bytesRead = socketChannel.read(buf).get(60, TimeUnit.SECONDS);
 				System.out.println("Got data of size: " + bytesRead);
-
-				String data = new String(buf.array(), 0, bytesRead);
-				System.out.println("RXed: " + data);
+				// convert to proto
+				commonUIElements.MessageProtos.Message msg = commonUIElements.MessageProtos.Message.parseFrom(buf.array());
+				System.out.println("RXed: " + msg.toString());
 				// add data to the message queue
-				messages.put(new Message(name, data.substring(1), "", Integer.parseInt(data.substring(0, 1))));
+				messages.put(new Message(msg.getSender(), msg.getMessage(), msg.getSignature(), msg.getClearance()));
 				// clear the buffer for the next message
 				buf.clear();
 			} catch (InterruptedException e) {
@@ -57,6 +59,8 @@ public class SocketReadThread implements Runnable {
 			} catch(ExecutionException e) {
 				System.err.println("Execution error, breaking out of loop");
 				break;
+			} catch(InvalidProtocolBufferException e) {
+				System.err.println("Invalid protobuf received");
 			}
 		}
 		try {
