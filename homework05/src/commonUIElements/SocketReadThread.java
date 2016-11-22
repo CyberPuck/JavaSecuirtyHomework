@@ -75,7 +75,6 @@ public class SocketReadThread implements Runnable {
 						.parseFrom(Arrays.copyOf(buf.array(), bytesRead));
 				System.out.println("RXed: " + msg.toString());
 				// add data to the message queue
-				// TODO: Verify signature before sending to the server
 				if (SignatureSystem.verifySignature(msg.getSignature(), msg.getMessage(), msg.getName(), keyStore)) {
 					messages.put(
 							new Message(msg.getSender(), msg.getMessage(), msg.getSignature(), msg.getClearance()));
