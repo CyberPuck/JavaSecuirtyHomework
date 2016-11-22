@@ -128,6 +128,7 @@ public class ClientSSLSocket {
 			this.socketChannel.close();
 			// kill the socket reader
 			this.socketReader.stop();
+			this.socketThread.interrupt();
 			this.socketThread.join();
 			this.msgReader.stop();
 			this.msgThread.interrupt();

@@ -44,20 +44,6 @@ public class ClientMain extends Application implements KeystoreAccessInterface {
 		// parse the command line args
 
 		if (parser.parseCommandLineArgs(args)) {
-			// execute the client application
-			// TODO: Move this logic to the UI controller that will establish
-			// the connection
-//			ClientSSLSocket socket = new ClientSSLSocket("127.0.0.1", 9001);
-//			try {
-//				socket.run();
-//				long startTime = System.currentTimeMillis();
-//				while (System.currentTimeMillis() - startTime < 60000) {
-//					// do nothing
-//				}
-//			} catch (Exception e) {
-//				System.err.println("Socket err: " + e.getMessage());
-//			}
-
 			// Launch the UI
 			launch(args);
 		}
@@ -73,7 +59,7 @@ public class ClientMain extends Application implements KeystoreAccessInterface {
 		// set the title
 		primaryStage.setTitle(title);
 		// boot up the pop up
-		popupController = new KeystoreAccessController(this, "Client key and trust store access");
+		popupController = new KeystoreAccessController(this, "Client key store access");
 		popupController.getKeystoreAccessStage().show();
 	}
 

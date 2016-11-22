@@ -26,6 +26,7 @@
       <Label layoutX="14.0" layoutY="87.0" text="Alias:" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="85.0" />
       <TextField fx:id="aliasField" layoutX="102.0" layoutY="83.0" prefHeight="25.0" prefWidth="335.0" promptText="Alias of client key" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="82.0" />
       <Label layoutX="14.0" layoutY="119.0" text="Password:" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="115.0" />
+      <PasswordField fx:id="keyPasswordField" layoutX="100.0" layoutY="113.0" prefHeight="25.0" prefWidth="400.0" promptText="Client key password" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="112.0" />
       <Button fx:id="loginBtn" layoutX="14.0" layoutY="153.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="126.0" text="Log in" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="153.0">
          <font>
             <Font size="18.0" />
@@ -36,6 +37,5 @@
             <Font size="18.0" />
          </font>
       </Button>
-      <PasswordField fx:id="keyPasswordField" layoutX="100.0" layoutY="113.0" prefHeight="25.0" prefWidth="400.0" promptText="Client key password" AnchorPane.leftAnchor="100.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="112.0" />
    </children>
 </AnchorPane>

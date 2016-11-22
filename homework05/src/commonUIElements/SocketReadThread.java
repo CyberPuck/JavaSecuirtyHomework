@@ -51,6 +51,9 @@ public class SocketReadThread implements Runnable {
 		this.keyStore = keyStore;
 	}
 
+	/**
+	 * Stops the running thread.
+	 */
 	public void stop() {
 		this.stopper = true;
 	}
