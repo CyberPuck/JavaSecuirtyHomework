@@ -55,12 +55,6 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	@FXML
 	private Button serverBtn;
 	@FXML
-	private TextField clientCertField;
-	@FXML
-	private Button browseCertBtn;
-	@FXML
-	private Button importCertBtn;
-	@FXML
 	private TextField serverPortField;
 
 	private static String LOG_FILE_PROPTERTY = "logFile";
@@ -144,7 +138,6 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 					logger.log(Level.SEVERE, "Failed to save settings file: " + e.getMessage());
 				}
 				// TODO: update the logger
-				// TODO: stop the server if it is running
 				if (serverOnline) {
 					serverSSLSocket.stop();
 				}

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
 import commonUIElements.Message;
-import commonUIElements.MessageProtos;
 import commonUIElements.MessageQueueReaderThread;
 import commonUIElements.SignatureSystem;
 
