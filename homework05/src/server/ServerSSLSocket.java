@@ -11,6 +11,8 @@ import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
+import javax.net.ssl.KeyManagerFactory;
+
 import commonUIElements.Message;
 import commonUIElements.MessageQueueReaderThread;
 import commonUIElements.SignatureSystem;
@@ -37,8 +39,8 @@ public class ServerSSLSocket {
 	private Thread msgThread;
 	// handles incoming messages, posts results to GUI
 	private MessageQueueReaderThread msgReader;
-	// key store containing client certificates
-	private KeyStore keyStore;
+	// trust store containing client certificates
+	private KeyStore trustStore;
 	// server private key for signing messages
 	private PrivateKey privateKey;
 
@@ -70,7 +72,7 @@ public class ServerSSLSocket {
 	 * @throws Exception
 	 *             thrown if an error occurs during connection setup
 	 */
-	public void startServer(KeyStore keyStore, PrivateKey key) throws Exception {
+	public void startServer(KeyStore trustStore, PrivateKey key) throws Exception {
 		connector = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
 
 		// setup the blocking queue reader thread
@@ -79,7 +81,7 @@ public class ServerSSLSocket {
 		msgThread.start();
 
 		// save off the keys
-		this.keyStore = keyStore;
+		this.trustStore = trustStore;
 		this.privateKey = key;
 
 		// accept incoming clients
@@ -93,7 +95,7 @@ public class ServerSSLSocket {
 				connector.accept(null, this);
 				// create the client
 				ClientRepresentative client = new ClientRepresentative(ch, "client" + clients.size(), messages,
-						keyStore);
+						trustStore);
 				clients.add(client);
 			}
 

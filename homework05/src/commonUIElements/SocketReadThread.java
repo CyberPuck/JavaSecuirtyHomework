@@ -29,7 +29,7 @@ public class SocketReadThread implements Runnable {
 	// name of the client being listened to
 	private String name;
 	// holds the certificates of the connected client(s)
-	private KeyStore keyStore;
+	private KeyStore trustStore;
 
 	/**
 	 * Creates the reader thread, listens over the socket channel for messages.
@@ -42,13 +42,15 @@ public class SocketReadThread implements Runnable {
 	 *            queue to post messages to
 	 * @param name
 	 *            client name
+	 * @param trustStore
+	 *            contains certificates to verify the message signature
 	 */
 	public SocketReadThread(AsynchronousSocketChannel ch, BlockingQueue<Message> messages, String name,
-			KeyStore keyStore) {
+			KeyStore trustStore) {
 		this.socketChannel = ch;
 		this.messages = messages;
 		this.name = name;
-		this.keyStore = keyStore;
+		this.trustStore = trustStore;
 	}
 
 	/**
@@ -75,7 +77,7 @@ public class SocketReadThread implements Runnable {
 						.parseFrom(Arrays.copyOf(buf.array(), bytesRead));
 				System.out.println("RXed: " + msg.toString());
 				// add data to the message queue
-				if (SignatureSystem.verifySignature(msg.getSignature(), msg.getMessage(), msg.getName(), keyStore)) {
+				if (SignatureSystem.verifySignature(msg.getSignature(), msg.getMessage(), msg.getName(), trustStore)) {
 					messages.put(
 							new Message(msg.getSender(), msg.getMessage(), msg.getSignature(), msg.getClearance()));
 				} else {

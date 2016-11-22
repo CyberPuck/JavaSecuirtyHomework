@@ -4,12 +4,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.security.Key;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -36,7 +32,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 public class ServerUILayoutController implements Initializable, SocketResponseInterface, KeyUnlockPopupInterface {
-	private static Logger logger = Logger.getLogger(ServerUILayoutController.class.getName());
+	private static Logger logger = Logger.getLogger("ServerLogger");
 
 	@FXML
 	private TextArea activityMsgArea;

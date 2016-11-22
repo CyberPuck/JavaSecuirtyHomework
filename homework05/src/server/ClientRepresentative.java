@@ -22,8 +22,8 @@ public class ClientRepresentative {
 	private SocketReadThread reader;
 	// Handles the external SocketReadThread
 	private Thread thread;
-	// Key store with certificates
-	private KeyStore keyStore;
+	// Trust store with certificates
+	private KeyStore trustStore;
 
 	/**
 	 * Creates a client representative. This can be either a client or server
@@ -37,15 +37,15 @@ public class ClientRepresentative {
 	 *            name of the connecting device for tracking purposes
 	 * @param messages
 	 *            queue received messages are posted to
-	 * @param ks
-	 *            key store with certificates to verify signatures
+	 * @param ts
+	 *            trust store with certificates to verify signatures
 	 */
 	public ClientRepresentative(AsynchronousSocketChannel ch, String name, BlockingQueue<Message> messages,
-			KeyStore ks) {
+			KeyStore ts) {
 		this.socketChannel = ch;
 		this.name = name;
-		this.keyStore = ks;
-		reader = new SocketReadThread(ch, messages, name, keyStore);
+		this.trustStore = ts;
+		reader = new SocketReadThread(ch, messages, name, trustStore);
 		thread = new Thread(reader);
 		thread.start();
 	}

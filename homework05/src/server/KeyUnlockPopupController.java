@@ -32,8 +32,6 @@ public class KeyUnlockPopupController implements Initializable {
 	private ServerUILayoutController controller;
 	// Stage for drawing the popup
 	private Stage popupStage;
-	// flag indicating if the popup is visible
-	private boolean visible = false;
 
 	public KeyUnlockPopupController(ServerUILayoutController controller) {
 		this.controller = controller;
@@ -90,10 +88,8 @@ public class KeyUnlockPopupController implements Initializable {
 	public void showPopup(boolean showPopup) {
 		if (showPopup) {
 			this.popupStage.show();
-			this.visible = true;
 		} else {
 			this.popupStage.hide();
-			this.visible = false;
 		}
 		// disable/enable server UI log in button
 		controller.keyUnlockPopupUpdate(showPopup);

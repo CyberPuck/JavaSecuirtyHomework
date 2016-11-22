@@ -28,7 +28,7 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 	private static CommandLineArgs parser;
 	private ServerUILayoutController serverContoller;
 	private static Properties settings;
-	private static Logger logger = Logger.getLogger(ServerMain.class.getName());
+	private static Logger logger = Logger.getLogger("ServerLogger");
 
 	public static void main(String[] args) {
 		// parse the command line
