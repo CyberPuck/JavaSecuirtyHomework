@@ -44,7 +44,7 @@ public class KeystoreAccessController implements Initializable {
 	 * @param main
 	 *            handle to ClientMain for when the password is entered.
 	 */
-	public KeystoreAccessController(KeystoreAccessInterface main) {
+	public KeystoreAccessController(KeystoreAccessInterface main, String title) {
 		this.main = main;
 		// load the scene
 		try {
@@ -55,7 +55,7 @@ public class KeystoreAccessController implements Initializable {
 			Pane pane = loader.load();
 			Scene keystoreScene = new Scene(pane);
 			this.keystoreAccessStage = new Stage();
-			this.keystoreAccessStage.setTitle("Client keystore access");
+			this.keystoreAccessStage.setTitle(title);
 			this.keystoreAccessStage.setScene(keystoreScene);
 		} catch (Exception e) {
 			System.err.println("Failed to load KeystoreAccess UI: " + e.getMessage());

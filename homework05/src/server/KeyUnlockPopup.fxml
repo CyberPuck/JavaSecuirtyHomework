@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<!-- Handles getting the password to unlock the server's key in the key store 
+	as it is password protected -->
+<AnchorPane minHeight="125.0" minWidth="300.0"
+	xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.65">
+	<children>
+		<Label layoutX="14.0" layoutY="14.0" text="Unlock the key:" />
+		<PasswordField fx:id="keyPasswordField" layoutX="14.0"
+			layoutY="31.0" prefHeight="25.0" prefWidth="270.0"
+			AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+		<Button fx:id="unlockBtn" layoutX="106.0" layoutY="70.0"
+			mnemonicParsing="false" text="Unlock Key">
+			<font>
+				<Font size="14.0" />
+			</font>
+		</Button>
+	</children>
+</AnchorPane>

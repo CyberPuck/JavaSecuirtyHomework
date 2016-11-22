@@ -6,6 +6,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousServerSocketChannel;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 
@@ -28,7 +30,6 @@ public class ServerSSLSocket {
 	private ServerUILayoutController controller;
 	private Thread msgThread;
 	private MessageQueueReaderThread msgReader;
-	
 
 	public ServerSSLSocket(int port, BlockingQueue<Message> messages, ServerUILayoutController controller) {
 		this.port = port;
@@ -37,7 +38,17 @@ public class ServerSSLSocket {
 		this.clients = new ArrayList<>();
 	}
 
-	public void startServer() throws Exception {
+	/**
+	 * Starts up the server to communicate to clients.
+	 * 
+	 * @param keyStore
+	 *            contains the client certificates
+	 * @param key
+	 *            used for signing server messages
+	 * @throws Exception
+	 *             thrown if an error occurs during connection setup
+	 */
+	public void startServer(KeyStore keyStore, PrivateKey key) throws Exception {
 		connector = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
 
 		// setup the blocking queue reader thread
@@ -79,6 +90,7 @@ public class ServerSSLSocket {
 		for (ClientRepresentative client : this.clients) {
 			if (!client.getName().equals(message.senderName)) {
 				String msg = message.clearance + message.message;
+				// TODO: Sign the message
 				client.getSocketChannel().write(ByteBuffer.wrap(msg.getBytes()));
 			}
 		}

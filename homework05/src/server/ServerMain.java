@@ -48,6 +48,7 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 					// set to default parameters
 					settings.setProperty("logFile", "log.xml");
 					settings.setProperty("port", "5280");
+					settings.setProperty("serverAlias", "myKey");
 					settings.store(new FileOutputStream(newSettingsFile), null);
 
 				} catch (IOException e2) {
@@ -91,7 +92,7 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 		// set the title
 		primaryStage.setTitle(title);
 		// boot up the pop up
-		popupController = new KeystoreAccessController(this);
+		popupController = new KeystoreAccessController(this, "Server key store access");
 		popupController.getKeystoreAccessStage().show();
 	}
 
@@ -117,7 +118,7 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 		// remove the popup UI
 		this.popupController.getKeystoreAccessStage().close();
 		// setup the client UI
-		this.serverContoller = new ServerUILayoutController(this.primaryStage, settings, parser.getSettings());
+		this.serverContoller = new ServerUILayoutController(this.primaryStage, settings, parser.getSettings(), keyStore, trustStore);
 	}
 
 }

@@ -73,7 +73,7 @@ public class ClientMain extends Application implements KeystoreAccessInterface {
 		// set the title
 		primaryStage.setTitle(title);
 		// boot up the pop up
-		popupController = new KeystoreAccessController(this);
+		popupController = new KeystoreAccessController(this, "Client key and trust store access");
 		popupController.getKeystoreAccessStage().show();
 	}
 

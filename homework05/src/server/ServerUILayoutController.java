@@ -4,10 +4,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.security.Key;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import commonUIElements.Message;
 import commonUIElements.SocketResponseInterface;
@@ -26,7 +35,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-public class ServerUILayoutController implements Initializable, SocketResponseInterface{
+public class ServerUILayoutController implements Initializable, SocketResponseInterface, KeyUnlockPopupInterface {
+	private static Logger logger = Logger.getLogger(ServerUILayoutController.class.getName());
+
 	@FXML
 	private TextArea activityMsgArea;
 	@FXML
@@ -51,10 +62,10 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	private Button importCertBtn;
 	@FXML
 	private TextField serverPortField;
-	
+
 	private static String LOG_FILE_PROPTERTY = "logFile";
 	private static String SERVER_PORT_PROPTERTY = "port";
-	
+
 	private boolean serverOnline = false;
 	private Stage serverUIStage;
 	private Properties settings;
@@ -62,12 +73,22 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	private FileChooser fileChooser = new FileChooser();
 	private ServerSSLSocket serverSSLSocket;
 	private BlockingQueue<Message> messages = new ArrayBlockingQueue<>(5);
-	// TODO: Implement server start up popup
-	
-	public ServerUILayoutController(Stage primaryStage, Properties settings, String settingsFile) {
+	// Controller for the key login pop up
+	private KeyUnlockPopupController keyUnlockController;
+	// Holds the client certificates
+	private KeyStore keyStore;
+	// Holds the server private/public keys
+	private KeyStore trustStore;
+	// Hold the key object for signing and SSL access
+	private PrivateKey serverKey;
+
+	public ServerUILayoutController(Stage primaryStage, Properties settings, String settingsFile, KeyStore keyStore,
+			KeyStore trustStore) {
 		this.settings = settings;
 		this.serverUIStage = primaryStage;
 		this.settingsFile = settingsFile;
+		this.keyStore = keyStore;
+		this.trustStore = trustStore;
 		// fire up the client UI
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("ServerUILayout.fxml"));
@@ -81,30 +102,32 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 			serverUIStage.setResizable(true);
 			serverUIStage.show();
 			// init the login controller
-//			loginController = new ServerLoginPopupController(this.serverUIStage, this);
-			
-			serverSSLSocket = new ServerSSLSocket(Integer.parseInt(settings.getProperty(SERVER_PORT_PROPTERTY)), messages, this);
+			keyUnlockController = new KeyUnlockPopupController(this);
+
+			serverSSLSocket = new ServerSSLSocket(Integer.parseInt(settings.getProperty(SERVER_PORT_PROPTERTY)),
+					messages, this);
 		} catch (IOException e) {
 			System.err.println("Failed to load the primary UI");
+			logger.log(Level.SEVERE, "Failed to load the primary UI");
 			System.exit(1);
 		}
 	}
-	
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		// make activity boxes not editable
 		activityLogFilefield.setEditable(false);
 		activityMsgArea.setEditable(false);
-		
+
 		// update Settings data from the file
-		if(settings.containsKey(LOG_FILE_PROPTERTY)) {
+		if (settings.containsKey(LOG_FILE_PROPTERTY)) {
 			settingsLogFileField.setText(settings.getProperty(LOG_FILE_PROPTERTY));
 			activityLogFilefield.setText(settings.getProperty(LOG_FILE_PROPTERTY));
 		}
-		if(settings.containsKey(SERVER_PORT_PROPTERTY)) {
+		if (settings.containsKey(SERVER_PORT_PROPTERTY)) {
 			serverPortField.setText(settings.getProperty(SERVER_PORT_PROPTERTY));
 		}
-		
+
 		// add button handlers
 		saveSettingsBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
@@ -116,48 +139,45 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 					settings.store(new FileOutputStream(settingsFile), null);
 				} catch (IOException e) {
 					System.err.println("Failed to save settings file: " + e.getMessage());
-					activityMsgArea.setText(activityMsgArea.getText() + "Failed to save settings file: " + e.getMessage() + "/n");
+					activityMsgArea.setText(
+							activityMsgArea.getText() + "Failed to save settings file: " + e.getMessage() + "/n");
+					logger.log(Level.SEVERE, "Failed to save settings file: " + e.getMessage());
 				}
 				// TODO: update the logger
 				// TODO: stop the server if it is running
-				if(serverOnline) {
+				if (serverOnline) {
 					serverSSLSocket.stop();
-					System.out.println("TODO: Stop the server");
 				}
 			}
 		});
-		
+
 		// add the log file browse button
 		logFileBrowser.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
 				File file = fileChooser.showOpenDialog(serverUIStage);
-                if (file != null) {
-                	settingsLogFileField.setText(file.toString());
-                }
+				if (file != null) {
+					settingsLogFileField.setText(file.toString());
+				}
 			}
 		});
-		
+
 		// setup the start server button
 		serverBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
-				if(!serverOnline) {
-					serverBtn.setText("Stop Server");
-					// start the server
-					try {
-						
-						serverSSLSocket.startServer();
-					} catch(Exception e) {
-						activityMsgArea.setText(activityMsgArea.getText() + "Error: " + e.getMessage() + "\n");
-					}
+				if (!serverOnline) {
+					// start the unlock controller
+					keyUnlockController.showPopup(true);
+
 				} else {
 					serverBtn.setText("Start Server");
 					// stop the server
 					serverSSLSocket.stop();
+					// toggle boolean
+					serverOnline = !serverOnline;
 				}
-				// toggle boolean
-				serverOnline = !serverOnline;
+
 			}
 		});
 		// handle the close button
@@ -165,7 +185,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 			@Override
 			public void handle(WindowEvent event) {
 				// if the server is online, close all connections
-				if(serverOnline) {
+				if (serverOnline) {
 					serverSSLSocket.stop();
 					serverOnline = !serverOnline;
 				}
@@ -175,14 +195,64 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 
 	@Override
 	public void socketMessage(Message message) {
+		logger.log(Level.INFO,
+				"Msg from client: " + message.senderName + "@" + message.clearance + ": " + message.message);
 		System.out.println("Msg from client: " + message);
-		activityMsgArea.setText(activityMsgArea.getText() + message.senderName + "@" + message.clearance + ": " + message.message + "\n");
+		activityMsgArea.setText(activityMsgArea.getText() + message.senderName + "@" + message.clearance + ": "
+				+ message.message + "\n");
 		this.serverSSLSocket.writeMessage(message);
 	}
 
 	@Override
 	public void socketError(String error) {
 		activityMsgArea.setText(activityMsgArea.getText() + "Error: " + error + "\n");
+		logger.log(Level.SEVERE, "Socket error: " + error);
 		// stop socket
+		this.serverSSLSocket.stop();
+	}
+
+	/**
+	 * Displays a message in the activity window of the server UI.
+	 * 
+	 * @param message
+	 *            String to show on the activity area.
+	 */
+	public void displayMessage(String message) {
+		activityMsgArea.setText(activityMsgArea.getText() + message + "\n");
+	}
+
+	@Override
+	public void unlockKey(char[] password) {
+		// attempt to unlock the key
+		try {
+			serverKey = (PrivateKey) trustStore.getKey(settings.getProperty("serverAlias"), password);
+			// verify the password
+			if (serverKey == null) {
+				activityMsgArea.setText(
+						activityMsgArea.getText() + "Error: Key password is invalid or the alias is incorrect\n");
+				logger.log(Level.SEVERE, "Error: Key password is invalid or the alias is incorrect\n");
+			} else {
+				// start the server
+				serverSSLSocket.startServer(keyStore, serverKey);
+				serverBtn.setText("Stop Server");
+				serverOnline = !serverOnline;
+			}
+		} catch (Exception e) {
+			activityMsgArea.setText(activityMsgArea.getText() + "Error: " + e.getMessage() + "\n");
+			logger.log(Level.SEVERE, "Key unlock error: " + e.getMessage());
+		}
+		// wipe the password
+		Arrays.fill(password, ' ');
+	}
+
+	/**
+	 * Enables a pop up to disable the server button until dialog operations
+	 * have completed.
+	 * 
+	 * @param isDisabled
+	 *            boolean indicating if the button should be disabled.
+	 */
+	public void keyUnlockPopupUpdate(boolean isDisabled) {
+		serverBtn.setDisable(isDisabled);
 	}
 }

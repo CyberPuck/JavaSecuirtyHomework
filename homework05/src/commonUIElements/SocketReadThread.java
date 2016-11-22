@@ -48,6 +48,7 @@ public class SocketReadThread implements Runnable {
 				commonUIElements.MessageProtos.Message msg = commonUIElements.MessageProtos.Message.parseFrom(buf.array());
 				System.out.println("RXed: " + msg.toString());
 				// add data to the message queue
+				// TODO: Verify signature before sending to the server
 				messages.put(new Message(msg.getSender(), msg.getMessage(), msg.getSignature(), msg.getClearance()));
 				// clear the buffer for the next message
 				buf.clear();
