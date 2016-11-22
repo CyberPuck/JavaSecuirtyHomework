@@ -10,17 +10,33 @@
 <!-- Primary client display, handles most UI elements once the local keystore 
 	is accessible. -->
 
-<AnchorPane minHeight="475.0" minWidth="450.0" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane minHeight="475.0" minWidth="450.0"
+	xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
 	<children>
-		<Button fx:id="loginBtn" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="Log in" AnchorPane.leftAnchor="14.0" />
-		<Button fx:id="exportBtn" layoutX="295.0" layoutY="14.0" mnemonicParsing="false" text="Export Client Certificate" AnchorPane.rightAnchor="14.0" />
-		<TextArea fx:id="rxField" editable="false" layoutX="14.0" layoutY="75.0" prefHeight="250.0" prefWidth="440.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="75.0" />
-		<Button fx:id="clearDisplayBtn" layoutX="13.0" layoutY="333.0" mnemonicParsing="false" text="Clear display" AnchorPane.bottomAnchor="120.0" AnchorPane.leftAnchor="14.0" />
-		<TextArea fx:id="msgField" layoutX="14.0" layoutY="362.0" prefHeight="71.0" prefWidth="416.0" AnchorPane.bottomAnchor="42.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-		<Label layoutX="14.0" layoutY="444.0" text="Message Clearance:" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" />
-		<ChoiceBox fx:id="clearanceComboBox" layoutX="126.0" layoutY="440.0" prefHeight="25.0" prefWidth="41.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="130.0" />
-		<Button fx:id="sendMsgBtn" layoutX="340.0" layoutY="440.0" mnemonicParsing="false" text="Send Message" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="14.0" />
-		<Label layoutX="14.0" layoutY="49.0" text="Received Messages:" AnchorPane.topAnchor="55.0" />
-		<Separator layoutX="5.0" layoutY="48.0" prefHeight="4.0" prefWidth="450.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="48.0" />
+		<Button fx:id="loginBtn" layoutX="14.0" layoutY="14.0"
+			mnemonicParsing="false" text="Log in" AnchorPane.leftAnchor="14.0" />
+		<TextArea fx:id="rxField" editable="false" layoutX="14.0"
+			layoutY="75.0" prefHeight="250.0" prefWidth="440.0"
+			AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="14.0"
+			AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="75.0" />
+		<Button fx:id="clearDisplayBtn" layoutX="13.0" layoutY="333.0"
+			mnemonicParsing="false" text="Clear display" AnchorPane.bottomAnchor="120.0"
+			AnchorPane.leftAnchor="14.0" />
+		<TextArea fx:id="msgField" layoutX="14.0" layoutY="362.0"
+			prefHeight="71.0" prefWidth="416.0" AnchorPane.bottomAnchor="42.0"
+			AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" />
+		<Label layoutX="14.0" layoutY="444.0" text="Message Clearance:"
+			AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" />
+		<ChoiceBox fx:id="clearanceComboBox" layoutX="126.0"
+			layoutY="440.0" prefHeight="25.0" prefWidth="41.0"
+			AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="130.0" />
+		<Button fx:id="sendMsgBtn" layoutX="340.0" layoutY="440.0"
+			mnemonicParsing="false" text="Send Message" AnchorPane.bottomAnchor="10.0"
+			AnchorPane.rightAnchor="14.0" />
+		<Label layoutX="14.0" layoutY="49.0" text="Received Messages:"
+			AnchorPane.topAnchor="55.0" />
+		<Separator layoutX="5.0" layoutY="48.0" prefHeight="4.0"
+			prefWidth="450.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0"
+			AnchorPane.topAnchor="48.0" />
 	</children>
 </AnchorPane>

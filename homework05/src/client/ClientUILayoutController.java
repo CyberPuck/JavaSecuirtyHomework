@@ -29,8 +29,6 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	@FXML
 	private Button loginBtn;
 	@FXML
-	private Button exportBtn;
-	@FXML
 	private TextArea rxField;
 	@FXML
 	private Button clearDisplayBtn;
@@ -113,14 +111,6 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 					connected = false;
 				}
 				updateButtons();
-			}
-		});
-
-		exportBtn.setOnMouseClicked(new EventHandler<MouseEvent>() {
-			@Override
-			public void handle(MouseEvent event) {
-				// run export function
-				// TODO: Remove
 			}
 		});
 
