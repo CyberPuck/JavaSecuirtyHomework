@@ -99,6 +99,6 @@ public class ClientMain extends Application implements KeystoreAccessInterface {
 		// remove the popup UI
 		this.popupController.getKeystoreAccessStage().close();
 		// setup the client UI
-		this.clientController = new ClientUILayoutController(this.primaryStage);
+		this.clientController = new ClientUILayoutController(this.primaryStage, keyStore, trustStore);
 	}
 }

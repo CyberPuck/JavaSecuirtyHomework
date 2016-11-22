@@ -7,7 +7,11 @@ package client;
  */
 public class ServerAttributes {
 	// address of the server
-	public String serverName = "";
+	public String serverName = "0.0.0.0";
 	// the port number of the server
 	public int port = 0;
+	// Client trust store alias
+	public String alias = "myKey";
+	// password to the private key
+	public char[] password;
 }

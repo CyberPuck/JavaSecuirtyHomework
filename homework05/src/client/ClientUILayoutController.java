@@ -2,6 +2,8 @@ package client;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.KeyStore;
+import java.security.PrivateKey;
 import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -48,8 +50,27 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	private ClientSSLSocket socket;
 	// message queue
 	private BlockingQueue<Message> messages = new ArrayBlockingQueue<>(5);
+	// key store with certificates
+	private KeyStore keyStore;
+	// trust store with private key
+	private KeyStore trustStore;
+	// String representing the alias of the client certificate
+	private String alias;
 
-	public ClientUILayoutController(Stage primaryStage) {
+	/**
+	 * Creates the primary GUI controller. Takes in both the key and trust
+	 * stores to communicate with the server.
+	 * 
+	 * @param primaryStage
+	 *            used for drawing the UI
+	 * @param ks
+	 *            key store with certs
+	 * @param ts
+	 *            key store with private key
+	 */
+	public ClientUILayoutController(Stage primaryStage, KeyStore ks, KeyStore ts) {
+		this.keyStore = ks;
+		this.trustStore = ts;
 		this.clientUIStage = primaryStage;
 		// fire up the client UI
 		try {
@@ -87,7 +108,6 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 					loginController.showPopup(true);
 					// disable the login button
 					loginBtn.setDisable(true);
-					connected = true;
 				} else {
 					socket.stop();
 					connected = false;
@@ -100,6 +120,7 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 			@Override
 			public void handle(MouseEvent event) {
 				// run export function
+				// TODO: Remove
 			}
 		});
 
@@ -118,7 +139,9 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 				if (connected) {
 					// only send a message if we are connected
 					// get the required fields for the message
-					socket.writeMessage(clearanceComboBox.getValue() + msgField.getText());
+					Message message = new Message("Client", msgField.getText(), "", clearanceComboBox.getValue());
+					message.alias = alias;
+					socket.writeMessage(message);
 					// clear out the message field
 					msgField.clear();
 				}
@@ -145,6 +168,12 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 		});
 	}
 
+	/**
+	 * Displays a message from the pop up.
+	 * 
+	 * @param message
+	 *            from the login pop up
+	 */
 	public void displayMessage(String message) {
 		this.rxField.setText(this.rxField.getText() + message + "\n");
 	}
@@ -161,9 +190,21 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 
 	@Override
 	public void login(ServerAttributes attr) {
+		// try to unlock the private key
+		PrivateKey clientKey = null;
+		this.alias = attr.alias;
+		try {
+			clientKey = (PrivateKey) this.keyStore.getKey(alias, attr.password);
+			if(clientKey == null) {
+				this.rxField.setText(rxField.getText() + "Error either the key password or alias is incorrect\n");
+				return;
+			}
+		} catch(Exception e) {
+			this.rxField.setText(rxField.getText() + "Error unlocking key: " + e.getMessage() + "\n");
+		}
 		this.socket = new ClientSSLSocket(attr.serverName, attr.port, messages, this);
 		try {
-			this.socket.startClient();
+			this.socket.startClient(this.trustStore, clientKey);
 		} catch (Exception e) {
 			this.rxField.setText(rxField.getText() + "Error: " + e.getMessage() + "\n");
 		}
@@ -171,6 +212,9 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 		updateButtons();
 	}
 
+	/**
+	 * Updates the login and send message buttons based on state.
+	 */
 	private void updateButtons() {
 		if (connected) {
 			loginBtn.setText("Log out");

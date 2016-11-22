@@ -10,6 +10,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -23,9 +24,9 @@ public class ServerLoginPopupController implements Initializable {
 	@FXML
 	private TextField portNumberField;
 	@FXML
-	private TextField userNameField;
+	private TextField aliasField;
 	@FXML
-	private TextField userPasswordField;
+	private PasswordField keyPasswordField;
 	@FXML
 	private Button loginBtn;
 	@FXML
@@ -87,6 +88,11 @@ public class ServerLoginPopupController implements Initializable {
 					ServerAttributes attr = new ServerAttributes();
 					attr.serverName = serverAddressField.getText();
 					attr.port = Integer.parseInt(portNumberField.getText());
+					attr.alias = aliasField.getText();
+					attr.password = keyPasswordField.getText().toCharArray();
+					// clean up the password
+					keyPasswordField.clear();
+					// notify the controller of the input
 					clientContoller.login(attr);
 					// hide the pop up
 					showPopup(false);

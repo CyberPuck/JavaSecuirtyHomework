@@ -1,6 +1,7 @@
 package server;
 
 import java.nio.channels.AsynchronousSocketChannel;
+import java.security.KeyStore;
 import java.util.concurrent.BlockingQueue;
 
 import commonUIElements.Message;
@@ -19,18 +20,41 @@ public class ClientRepresentative {
 	private AsynchronousSocketChannel socketChannel;
 	// Thread for reading
 	private SocketReadThread reader;
+	// Handles the external SocketReadThread
 	private Thread thread;
-	
-	public ClientRepresentative(AsynchronousSocketChannel ch, String name, BlockingQueue<Message> messages) {
+	// Key store with certificates
+	private KeyStore keyStore;
+
+	/**
+	 * Creates a client representative. This can be either a client or server
+	 * depending on the implementation. It is given a socket channel, primary
+	 * task is loading valid recevied messages into the message queue for the
+	 * GUI.
+	 * 
+	 * @param ch
+	 *            socket channel messages arrive on
+	 * @param name
+	 *            name of the connecting device for tracking purposes
+	 * @param messages
+	 *            queue received messages are posted to
+	 * @param ks
+	 *            key store with certificates to verify signatures
+	 */
+	public ClientRepresentative(AsynchronousSocketChannel ch, String name, BlockingQueue<Message> messages,
+			KeyStore ks) {
 		this.socketChannel = ch;
 		this.name = name;
-		reader = new SocketReadThread(ch, messages, name);
+		this.keyStore = ks;
+		reader = new SocketReadThread(ch, messages, name, keyStore);
 		thread = new Thread(reader);
 		thread.start();
 	}
-	
+
+	/**
+	 * Stops the client Representative reader thread from receiving messages.
+	 */
 	public void stop() {
-		
+
 		try {
 			// kill channel
 			this.socketChannel.close();
@@ -42,14 +66,29 @@ public class ClientRepresentative {
 		}
 	}
 
+	/**
+	 * Gets the name of the connected client.
+	 * 
+	 * @return the client name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Gets the socket channel being listened over.
+	 * 
+	 * @return SocketChannel
+	 */
 	public AsynchronousSocketChannel getSocketChannel() {
 		return socketChannel;
 	}
 
+	/**
+	 * Returns the reader thread listening over the socket channel for messages.
+	 * 
+	 * @return Reader thread
+	 */
 	public SocketReadThread getReader() {
 		return reader;
 	}

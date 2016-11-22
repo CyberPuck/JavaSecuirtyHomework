@@ -200,6 +200,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 		System.out.println("Msg from client: " + message);
 		activityMsgArea.setText(activityMsgArea.getText() + message.senderName + "@" + message.clearance + ": "
 				+ message.message + "\n");
+		message.alias = settings.getProperty("serverAlias");
 		this.serverSSLSocket.writeMessage(message);
 	}
 
@@ -225,7 +226,10 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	public void unlockKey(char[] password) {
 		// attempt to unlock the key
 		try {
-			serverKey = (PrivateKey) trustStore.getKey(settings.getProperty("serverAlias"), password);
+			if(keyStore.containsAlias(settings.getProperty("serverAlias"))) {
+				System.out.println("Key exists");
+			}
+			serverKey = (PrivateKey) keyStore.getKey(settings.getProperty("serverAlias"), password);
 			// verify the password
 			if (serverKey == null) {
 				activityMsgArea.setText(
@@ -233,7 +237,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 				logger.log(Level.SEVERE, "Error: Key password is invalid or the alias is incorrect\n");
 			} else {
 				// start the server
-				serverSSLSocket.startServer(keyStore, serverKey);
+				serverSSLSocket.startServer(trustStore, serverKey);
 				serverBtn.setText("Stop Server");
 				serverOnline = !serverOnline;
 			}
