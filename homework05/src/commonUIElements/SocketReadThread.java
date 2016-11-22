@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -58,7 +59,7 @@ public class SocketReadThread implements Runnable {
 	public void run() {
 		System.out.println("Waiting for input");
 		// Handle reading data until we exit
-		ByteBuffer buf = ByteBuffer.allocate(1024);
+		ByteBuffer buf = ByteBuffer.allocate(2048);
 		while (!stopper && socketChannel.isOpen()) {
 			System.out.println("Reading the socket");
 			try {
@@ -68,7 +69,7 @@ public class SocketReadThread implements Runnable {
 				System.out.println("Got data of size: " + bytesRead);
 				// convert to proto
 				commonUIElements.MessageProtos.Message msg = commonUIElements.MessageProtos.Message
-						.parseFrom(buf.array());
+						.parseFrom(Arrays.copyOf(buf.array(), bytesRead));
 				System.out.println("RXed: " + msg.toString());
 				// add data to the message queue
 				// TODO: Verify signature before sending to the server
@@ -90,7 +91,7 @@ public class SocketReadThread implements Runnable {
 				System.err.println("Execution error, breaking out of loop");
 				break;
 			} catch (InvalidProtocolBufferException e) {
-				System.err.println("Invalid protobuf received");
+				System.err.println("Invalid protobuf received: " + e.getMessage());
 			}
 		}
 		try {

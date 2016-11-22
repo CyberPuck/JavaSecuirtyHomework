@@ -57,7 +57,13 @@ public class SignatureSystem {
 	 */
 	public static boolean verifySignature(String signature, String message, String certAlias, KeyStore keyStore) {
 		Signature signAlgorithm;
+		System.out.println("Alias: " + certAlias);
+		
 		try {
+			if(keyStore.containsAlias(certAlias)) {
+				System.out.println("We go the cert!");
+			}
+			
 			signAlgorithm = Signature.getInstance(SIGNING_ALGORITHM);
 			signAlgorithm.initVerify(keyStore.getCertificate(certAlias));
 			signAlgorithm.update(message.getBytes());

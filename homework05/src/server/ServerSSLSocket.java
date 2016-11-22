@@ -128,6 +128,7 @@ public class ServerSSLSocket {
 						.setClearance(message.clearance).setMessage(message.message).setName(message.alias)
 						.setSender(message.senderName)
 						.setSignature(SignatureSystem.signMessage(message.message, privateKey)).build();
+				System.out.println("Message size: " + msg.toByteArray().length);
 				client.getSocketChannel().write(ByteBuffer.wrap(msg.toByteArray()));
 			}
 		}
