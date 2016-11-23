@@ -6,17 +6,26 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.util.concurrent.BlockingQueue;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.TrustManagerFactory;
 
 import commonUIElements.Message;
 import commonUIElements.MessageQueueReaderThread;
 import commonUIElements.SignatureSystem;
 import commonUIElements.SocketReadThread;
 
+/**
+ * Handles the socket connection to the server, for I/O.
+ * 
+ * @author Kyle
+ */
 public class ClientSSLSocket {
-	private SSLEngine engine;
 	// port the server is running on
 	private int port;
 	// address of the server
@@ -39,6 +48,13 @@ public class ClientSSLSocket {
 	private KeyStore keyStore;
 	// holds the clients private key
 	private PrivateKey privateKey;
+	// Management objects for the key and trust stores
+	private KeyManagerFactory kmf;
+	private TrustManagerFactory tmf;
+	// SSL engine
+	private SSLEngine clientEngine;
+	// SSL Context, holds the key and trust managers
+	private SSLContext sslContext;
 
 	/**
 	 * Sets up the socket connection to the server. This includes the SSLEngine
@@ -68,18 +84,32 @@ public class ClientSSLSocket {
 	 *            key store with certificates
 	 * @param key
 	 *            private key of the clients
+	 * @param kmf
+	 *            holds the client public/private keys
+	 * @param tmf
+	 *            holds the server cert
 	 * @throws Exception
 	 *             throws exception if connection error occurs
 	 */
-	public void startClient(KeyStore ks, PrivateKey key) throws Exception {
+	public void startClient(KeyStore ks, PrivateKey key, KeyManagerFactory kmf, TrustManagerFactory tmf)
+			throws Exception {
 		System.out.println("Client connecting to: " + address + "@" + port);
 		// create the client channel
 		this.socketChannel = AsynchronousSocketChannel.open();
 		// store KS and private key
 		this.keyStore = ks;
 		this.privateKey = key;
+		// setup the SSL context and SSL engine
+		// this.sslContext = SSLContext.getInstance("TLSv1.2");
+		// this.sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(),
+		// SecureRandom.getInstance("SHA1PRNG"));
+		// // setup the SSL engine to connect to the client
+		// this.clientEngine = sslContext.createSSLEngine(this.address,
+		// this.port);
+		// // server always needs to authenticate
+		// this.clientEngine.setNeedClientAuth(true);
+		// this.clientEngine.setUseClientMode(true);
 
-		// socketChannel.configureBlocking(false);
 		socketChannel.connect(new InetSocketAddress(address, port), this.socketChannel,
 				new CompletionHandler<Void, AsynchronousSocketChannel>() {
 
@@ -88,7 +118,7 @@ public class ClientSSLSocket {
 						System.out.println("Connected to server");
 						// setup threads
 						// setup the socket reader
-						socketReader = new SocketReadThread(socketChannel, messages, "Server", keyStore);
+						socketReader = new SocketReadThread(socketChannel, messages, "Server", keyStore, clientEngine);
 						socketThread = new Thread(socketReader);
 						socketThread.start();
 						// setup the message reader
@@ -116,7 +146,14 @@ public class ClientSSLSocket {
 				.setClearance(message.clearance).setMessage(message.message).setName(message.alias)
 				.setSender(message.senderName).setSignature(SignatureSystem.signMessage(message.message, privateKey))
 				.build();
+		// try {
+		// ByteBuffer dst = ByteBuffer.allocate(2048);
+		// this.clientEngine.wrap(ByteBuffer.wrap(msg.toByteArray()), dst);
 		socketChannel.write(ByteBuffer.wrap(msg.toByteArray()));
+		// } catch (SSLException e) {
+		// System.err.println("Error writing message over socket: " +
+		// e.getMessage());
+		// }
 	}
 
 	/**

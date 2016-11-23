@@ -16,13 +16,18 @@ public class Message {
 	public String signature;
 	// clearance of the message
 	public int clearance;
-	
+
 	/**
+	 * Simple message container.
 	 * 
 	 * @param name
+	 *            name of alias of the message sender
 	 * @param msg
+	 *            string
 	 * @param signature
+	 *            BASE64 encoded signature of msg
 	 * @param clearance
+	 *            level (1-4)
 	 */
 	public Message(String name, String msg, String signature, int clearance) {
 		this.senderName = name;

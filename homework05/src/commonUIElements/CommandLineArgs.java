@@ -15,6 +15,8 @@ public class CommandLineArgs {
 	private String mainName = "unknown";
 	// location of the settings file
 	private String settingsLocation = ".settings";
+	// location of the client settings file
+	private String clientSettings = ".clientSettings";
 
 	/**
 	 * Constructor, allows the name of the application to be passed into the
@@ -48,7 +50,10 @@ public class CommandLineArgs {
 				break;
 			case "-t":
 				trustStoreLocation = args[++i];
-			break;
+				break;
+			case "-c":
+				clientSettings = args[++i];
+				break;
 			case "--help": // print help and stop execution
 				printHelp();
 				return false;
@@ -71,6 +76,7 @@ public class CommandLineArgs {
 		System.out.println("<-k>   Custom location of the key store, default=./.keystore");
 		System.out.println("<-t>   Custom location of the trust store, default=./.truststore");
 		System.out.println("<-s>   Custom location of the settings file, default=./.settings");
+		System.out.println("<-s>   Custom location of the client settings file, default=./.clientSettings");
 
 	}
 
@@ -110,5 +116,14 @@ public class CommandLineArgs {
 	 */
 	public String getTrustStoreLocation() {
 		return trustStoreLocation;
+	}
+
+	/**
+	 * Get the location of the client settings file.
+	 * 
+	 * @return String representing the path to the client settings file.
+	 */
+	public String getClientSettings() {
+		return clientSettings;
 	}
 }

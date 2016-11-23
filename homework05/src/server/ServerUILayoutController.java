@@ -14,6 +14,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
+
 import commonUIElements.Message;
 import commonUIElements.SocketResponseInterface;
 import javafx.event.EventHandler;
@@ -31,9 +34,16 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+/**
+ * Primary class that handles logic for the Server UI. This includes
+ * establishing a connection as well as handling the various settings of the
+ * system.
+ * 
+ * @author Kyle
+ */
 public class ServerUILayoutController implements Initializable, SocketResponseInterface, KeyUnlockPopupInterface {
 	private static Logger logger = Logger.getLogger("ServerLogger");
-
+	// UI elements
 	@FXML
 	private TextArea activityMsgArea;
 	@FXML
@@ -52,16 +62,24 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	private Button serverBtn;
 	@FXML
 	private TextField serverPortField;
-
+	// default properties to look at
 	private static String LOG_FILE_PROPTERTY = "logFile";
 	private static String SERVER_PORT_PROPTERTY = "port";
-
+	// flag indicating if the server is running
 	private boolean serverOnline = false;
+	// stage holding the GUI elements
 	private Stage serverUIStage;
+	// holds the client clearance levels
+	private Properties clients;
+	// settings for the server
 	private Properties settings;
+	// Path to the settings file
 	private String settingsFile;
+	// Holder for the file explorer app
 	private FileChooser fileChooser = new FileChooser();
+	// server socket
 	private ServerSSLSocket serverSSLSocket;
+	// message queue, gets filled when client messages are received
 	private BlockingQueue<Message> messages = new ArrayBlockingQueue<>(5);
 	// Controller for the key login pop up
 	private KeyUnlockPopupController keyUnlockController;
@@ -71,14 +89,44 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	private KeyStore trustStore;
 	// Hold the key object for signing and SSL access
 	private PrivateKey serverKey;
+	// Holds the key store management object
+	private KeyManagerFactory kmf;
+	// Holds the trust store management object
+	private TrustManagerFactory tmf;
 
-	public ServerUILayoutController(Stage primaryStage, Properties settings, String settingsFile, KeyStore keyStore,
-			KeyStore trustStore) {
+	/**
+	 * Constructor, stores off the key stores and starts the GUI application.
+	 * 
+	 * @param primaryStage
+	 *            Handle to write GUI elements to
+	 * @param settings
+	 *            Serve settings
+	 * @param clientSettings
+	 *            Handles the alias to clearance association
+	 * @param settingsFile
+	 *            path to settings file
+	 * @param keyStore
+	 *            key store of the server
+	 * @param trustStore
+	 *            trust store of the server
+	 * @param kmf
+	 *            Key manager of server key store
+	 * @param tmf
+	 *            Trust manager of the server trust store
+	 */
+	public ServerUILayoutController(Stage primaryStage, Properties settings, Properties clientSettings,
+			String settingsFile, KeyStore keyStore, KeyStore trustStore, KeyManagerFactory kmf,
+			TrustManagerFactory tmf) {
 		this.settings = settings;
 		this.serverUIStage = primaryStage;
 		this.settingsFile = settingsFile;
+		this.clients = clientSettings;
+		// setup the stores
 		this.keyStore = keyStore;
 		this.trustStore = trustStore;
+		this.kmf = kmf;
+		this.tmf = tmf;
+
 		// fire up the client UI
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("ServerUILayout.fxml"));
@@ -95,7 +143,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 			keyUnlockController = new KeyUnlockPopupController(this);
 
 			serverSSLSocket = new ServerSSLSocket(Integer.parseInt(settings.getProperty(SERVER_PORT_PROPTERTY)),
-					messages, this);
+					messages, this, clients);
 		} catch (IOException e) {
 			System.err.println("Failed to load the primary UI");
 			logger.log(Level.SEVERE, "Failed to load the primary UI");
@@ -133,8 +181,9 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 							activityMsgArea.getText() + "Failed to save settings file: " + e.getMessage() + "/n");
 					logger.log(Level.SEVERE, "Failed to save settings file: " + e.getMessage());
 				}
-				// TODO: update the logger
+
 				if (serverOnline) {
+					logger.fine("Shutting down server as settings have been updated");
 					serverSSLSocket.stop();
 				}
 			}
@@ -215,7 +264,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 	public void unlockKey(char[] password) {
 		// attempt to unlock the key
 		try {
-			if(keyStore.containsAlias(settings.getProperty("serverAlias"))) {
+			if (keyStore.containsAlias(settings.getProperty("serverAlias"))) {
 				System.out.println("Key exists");
 			}
 			serverKey = (PrivateKey) keyStore.getKey(settings.getProperty("serverAlias"), password);
@@ -226,7 +275,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 				logger.log(Level.SEVERE, "Error: Key password is invalid or the alias is incorrect\n");
 			} else {
 				// start the server
-				serverSSLSocket.startServer(trustStore, serverKey);
+				serverSSLSocket.startServer(trustStore, serverKey, kmf, tmf);
 				serverBtn.setText("Stop Server");
 				serverOnline = !serverOnline;
 			}

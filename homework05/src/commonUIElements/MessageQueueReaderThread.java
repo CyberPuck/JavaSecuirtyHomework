@@ -2,11 +2,25 @@ package commonUIElements;
 
 import java.util.concurrent.BlockingQueue;
 
-public class MessageQueueReaderThread implements Runnable{
+/**
+ * Handles reading messages from the message queue and passes them to the
+ * controller to display them.
+ * 
+ * @author Kyle
+ */
+public class MessageQueueReaderThread implements Runnable {
 	private volatile boolean stop = false;
 	private BlockingQueue<Message> messages;
 	SocketResponseInterface controller;
 
+	/**
+	 * Takes in the message queue and controller interface.
+	 * 
+	 * @param messages
+	 *            queue for received messages.
+	 * @param controller
+	 *            to post results of messages received.
+	 */
 	public MessageQueueReaderThread(BlockingQueue<Message> messages, SocketResponseInterface controller) {
 		this.messages = messages;
 		this.controller = controller;
@@ -30,6 +44,9 @@ public class MessageQueueReaderThread implements Runnable{
 		System.out.println("Exiting...");
 	}
 
+	/**
+	 * Stops the message queue reader.
+	 */
 	public void stop() {
 		stop = true;
 	}

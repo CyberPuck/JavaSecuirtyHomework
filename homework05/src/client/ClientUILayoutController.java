@@ -8,6 +8,9 @@ import java.util.ResourceBundle;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
+
 import commonUIElements.Message;
 import commonUIElements.SocketResponseInterface;
 import javafx.beans.value.ChangeListener;
@@ -25,6 +28,12 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+/**
+ * Primary UI controller for the client, handles connecting to the server,
+ * sending messages, and receiving messages.
+ * 
+ * @author Kyle
+ */
 public class ClientUILayoutController implements Initializable, ServerLoginPopupInterface, SocketResponseInterface {
 	@FXML
 	private Button loginBtn;
@@ -54,6 +63,9 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	private KeyStore trustStore;
 	// String representing the alias of the client certificate
 	private String alias;
+	// managers for the key stores
+	private KeyManagerFactory kmf;
+	private TrustManagerFactory tmf;
 
 	/**
 	 * Creates the primary GUI controller. Takes in both the key and trust
@@ -66,9 +78,13 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 	 * @param ts
 	 *            key store with private key
 	 */
-	public ClientUILayoutController(Stage primaryStage, KeyStore ks, KeyStore ts) {
+	public ClientUILayoutController(Stage primaryStage, KeyStore ks, KeyStore ts, KeyManagerFactory kmf,
+			TrustManagerFactory tmf) {
 		this.keyStore = ks;
 		this.trustStore = ts;
+		this.kmf = kmf;
+		this.tmf = tmf;
+
 		this.clientUIStage = primaryStage;
 		// fire up the client UI
 		try {
@@ -129,7 +145,10 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 				if (connected) {
 					// only send a message if we are connected
 					// get the required fields for the message
-					Message message = new Message("Client", msgField.getText(), "", clearanceComboBox.getValue());
+					Message message = new Message(alias, msgField.getText(), "", clearanceComboBox.getValue());
+					// record message sent on UI
+					rxField.setText(rxField.getText() + "Me: " + message.message + "\n");
+					// record alias for the server to look up the certificate
 					message.alias = alias;
 					socket.writeMessage(message);
 					// clear out the message field
@@ -185,16 +204,16 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 		this.alias = attr.alias;
 		try {
 			clientKey = (PrivateKey) this.keyStore.getKey(alias, attr.password);
-			if(clientKey == null) {
+			if (clientKey == null) {
 				this.rxField.setText(rxField.getText() + "Error either the key password or alias is incorrect\n");
 				return;
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			this.rxField.setText(rxField.getText() + "Error unlocking key: " + e.getMessage() + "\n");
 		}
 		this.socket = new ClientSSLSocket(attr.serverName, attr.port, messages, this);
 		try {
-			this.socket.startClient(this.trustStore, clientKey);
+			this.socket.startClient(this.trustStore, clientKey, this.kmf, this.tmf);
 		} catch (Exception e) {
 			this.rxField.setText(rxField.getText() + "Error: " + e.getMessage() + "\n");
 		}

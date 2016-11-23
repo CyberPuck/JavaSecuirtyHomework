@@ -10,8 +10,12 @@ import java.util.Arrays;
 import java.util.Properties;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 import commonUIElements.CommandLineArgs;
 import commonUIElements.KeystoreAccessController;
@@ -22,14 +26,28 @@ import javafx.stage.Stage;
 import keyStore.KeyStoreAccessor;
 
 public class ServerMain extends Application implements KeystoreAccessInterface {
+	// stage to write UIs to
 	private Stage primaryStage;
+	// Title of the program
 	private String title = "Secure Chat Server";
+	// pop up for getting passwords to the key store
 	private KeystoreAccessController popupController;
+	// parses the command line
 	private static CommandLineArgs parser;
-	private ServerUILayoutController serverContoller;
+	// holds the server settings
 	private static Properties settings;
+	// holds the alias to clearance association
+	private static Properties clientSettings;
+	// logger
 	private static Logger logger = Logger.getLogger("ServerLogger");
 
+	/**
+	 * Starts the program, reads in cmd line args, settings, client settings,
+	 * and starts the login popup.
+	 * 
+	 * @param args
+	 *            command line arguments
+	 */
 	public static void main(String[] args) {
 		// parse the command line
 		parser = new CommandLineArgs("Server");
@@ -59,6 +77,15 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 			} catch (IOException e) {
 				// exit, something was wrong with the settings file
 				System.out.println("Failed to open settings file: " + e.getMessage());
+				System.exit(1);
+			}
+			// read in the client settings
+			clientSettings = new Properties();
+			try {
+				clientSettings.load(new FileInputStream(parser.getClientSettings()));
+			} catch(IOException e) {
+				// exit application if the client settings can't be read
+				System.err.println("Failed to open client settings: " + e.getMessage());
 				System.exit(1);
 			}
 			// setup the logger
@@ -98,27 +125,38 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 
 	@Override
 	public void onLoginRequest(final char[] keyStorePassword, final char[] trustStorePassword) {
-		// Try to open the key store
-		KeyStore keyStore = KeyStoreAccessor.getKeyStore(keyStorePassword, parser.getKeystoreLocation());
-		// Try to open the trust store
-		KeyStore trustStore = KeyStoreAccessor.getKeyStore(trustStorePassword, parser.getTrustStoreLocation());
+		try {
+			// Try to open the key store
+			KeyStore keyStore = KeyStoreAccessor.getKeyStore(keyStorePassword, parser.getKeystoreLocation());
+			// setup the key management object
+			KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+			kmf.init(keyStore, keyStorePassword);
+			// Try to open the trust store
+			KeyStore trustStore = KeyStoreAccessor.getKeyStore(trustStorePassword, parser.getTrustStoreLocation());
+			// setup trust store management object
+			TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+			tmf.init(trustStore);
+			if (keyStore == null || kmf == null) {
+				logger.severe("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
+						+ "\" either the keystore does not exist or the password was incorrect");
+				System.exit(1);
+			}
+			if (trustStore == null || tmf == null) {
+				logger.severe("Trust store failed to open at:  \"" + parser.getTrustStoreLocation()
+						+ "\" either the trust store does not exist or the password was incorrect");
+				System.exit(1);
+			}
+			// remove the popup UI
+			this.popupController.getKeystoreAccessStage().close();
+			// setup the client UI
+			new ServerUILayoutController(this.primaryStage, settings, clientSettings, parser.getSettings(),
+					keyStore, trustStore, kmf, tmf);
+		} catch (Exception e) {
+			logger.log(Level.SEVERE, "Error setting up the management objects: " + e.getMessage());
+			System.exit(1);
+		}
 		// clear out password
 		Arrays.fill(keyStorePassword, ' ');
 		Arrays.fill(trustStorePassword, ' ');
-		if (keyStore == null) {
-			logger.severe("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
-					+ "\" either the keystore does not exist or the password was incorrect");
-			System.exit(1);
-		}
-		if (trustStore == null) {
-			logger.severe("Trust store failed to open at:  \"" + parser.getTrustStoreLocation()
-					+ "\" either the trust store does not exist or the password was incorrect");
-			System.exit(1);
-		}
-		// remove the popup UI
-		this.popupController.getKeystoreAccessStage().close();
-		// setup the client UI
-		this.serverContoller = new ServerUILayoutController(this.primaryStage, settings, parser.getSettings(), keyStore, trustStore);
 	}
-
 }

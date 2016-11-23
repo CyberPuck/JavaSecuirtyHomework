@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.net.ssl.SSLEngine;
+
 import com.google.protobuf.InvalidProtocolBufferException;
 
 /**
@@ -30,6 +32,8 @@ public class SocketReadThread implements Runnable {
 	private String name;
 	// holds the certificates of the connected client(s)
 	private KeyStore trustStore;
+	// SSL Engine for encrypted communication
+	private SSLEngine engine;
 
 	/**
 	 * Creates the reader thread, listens over the socket channel for messages.
@@ -42,15 +46,18 @@ public class SocketReadThread implements Runnable {
 	 *            queue to post messages to
 	 * @param name
 	 *            client name
+	 * @param engine
+	 *            SSL engine for encrypted communications
 	 * @param trustStore
 	 *            contains certificates to verify the message signature
 	 */
 	public SocketReadThread(AsynchronousSocketChannel ch, BlockingQueue<Message> messages, String name,
-			KeyStore trustStore) {
+			KeyStore trustStore, SSLEngine engine) {
 		this.socketChannel = ch;
 		this.messages = messages;
 		this.name = name;
 		this.trustStore = trustStore;
+		this.engine = engine;
 	}
 
 	/**
@@ -60,6 +67,10 @@ public class SocketReadThread implements Runnable {
 		this.stopper = true;
 	}
 
+	/**
+	 * Read socket channel for incoming messages and post them to the message
+	 * queue.
+	 */
 	@Override
 	public void run() {
 		System.out.println("Waiting for input");
@@ -71,6 +82,8 @@ public class SocketReadThread implements Runnable {
 				// No input from the user in 60 seconds results in kicking them
 				// out
 				int bytesRead = socketChannel.read(buf).get(60, TimeUnit.SECONDS);
+				// ByteBuffer dst = ByteBuffer.allocate(bytesRead);
+				// engine.unwrap(buf, dst);
 				System.out.println("Got data of size: " + bytesRead);
 				// convert to proto
 				commonUIElements.MessageProtos.Message msg = commonUIElements.MessageProtos.Message
@@ -96,6 +109,8 @@ public class SocketReadThread implements Runnable {
 				break;
 			} catch (InvalidProtocolBufferException e) {
 				System.err.println("Invalid protobuf received: " + e.getMessage());
+				// } catch(SSLException e) {
+				// System.err.println("SSL Failed: " + e.getMessage());
 			}
 		}
 		try {

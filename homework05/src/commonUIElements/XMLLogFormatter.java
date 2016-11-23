@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.logging.LogRecord;
 import java.util.logging.XMLFormatter;
 
-import javax.xml.crypto.dsig.Transform;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;

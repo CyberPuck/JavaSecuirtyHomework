@@ -8,10 +8,16 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Logger;
 
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManagerFactory;
 
 import commonUIElements.Message;
 import commonUIElements.MessageQueueReaderThread;
@@ -25,6 +31,7 @@ import commonUIElements.SignatureSystem;
  *
  */
 public class ServerSSLSocket {
+	private static Logger logger = Logger.getLogger("ServerLogger");
 	// port number the server is running
 	private int port;
 	// server socket
@@ -43,6 +50,15 @@ public class ServerSSLSocket {
 	private KeyStore trustStore;
 	// server private key for signing messages
 	private PrivateKey privateKey;
+	// Management objects for the key and trust stores
+	private KeyManagerFactory kmf;
+	private TrustManagerFactory tmf;
+	// SSL engine
+	private SSLEngine serverEngine;
+	// SSL Context, holds the key and trust managers
+	private SSLContext sslContext;
+	// list of client aliases with associated clearance level
+	private Properties clientSettings;
 
 	/**
 	 * Creates the ServerSSLSocket, this requires the SSLEngine to enable SSL
@@ -54,12 +70,17 @@ public class ServerSSLSocket {
 	 *            queue used to update the GUI when a client message is received
 	 * @param controller
 	 *            UI controller to kick back messages and information
+	 * @param clientSettings
+	 *            Properties with alias to clearance associations
 	 */
-	public ServerSSLSocket(int port, BlockingQueue<Message> messages, ServerUILayoutController controller) {
+	public ServerSSLSocket(int port, BlockingQueue<Message> messages, ServerUILayoutController controller,
+			Properties clientSettings) {
 		this.port = port;
 		this.messages = messages;
 		this.controller = controller;
 		this.clients = new ArrayList<>();
+		this.clientSettings = clientSettings;
+
 	}
 
 	/**
@@ -72,7 +93,8 @@ public class ServerSSLSocket {
 	 * @throws Exception
 	 *             thrown if an error occurs during connection setup
 	 */
-	public void startServer(KeyStore trustStore, PrivateKey key) throws Exception {
+	public void startServer(KeyStore trustStore, PrivateKey key, KeyManagerFactory kmf, TrustManagerFactory tmf)
+			throws Exception {
 		connector = AsynchronousServerSocketChannel.open().bind(new InetSocketAddress(port));
 
 		// setup the blocking queue reader thread
@@ -83,19 +105,31 @@ public class ServerSSLSocket {
 		// save off the keys
 		this.trustStore = trustStore;
 		this.privateKey = key;
+		// store the management factories for SSL
+		this.kmf = kmf;
+		this.tmf = tmf;
 
+		// setup the SSL context
+		// NOTE: Force TLSv1.2 to avoid issues like POODLE, BEAST, etc.
+		sslContext = SSLContext.getInstance("TLSv1.2");
+		sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), SecureRandom.getInstance("SHA1PRNG"));
+		// setup the SSL engine for incoming connections
+		serverEngine = sslContext.createSSLEngine();
+
+		// client always needs to authenticate
+		serverEngine.setNeedClientAuth(true);
+		serverEngine.setUseClientMode(false);
 		// accept incoming clients
 		connector.accept(null, new CompletionHandler<AsynchronousSocketChannel, Void>() {
 
 			@Override
 			public void completed(AsynchronousSocketChannel ch, Void attachment) {
-				// TODO: Log
-				System.out.println("Client connected!");
+				logger.info("Client connected");
 				// handle I/O
 				connector.accept(null, this);
 				// create the client
 				ClientRepresentative client = new ClientRepresentative(ch, "client" + clients.size(), messages,
-						trustStore);
+						trustStore, serverEngine);
 				clients.add(client);
 			}
 
@@ -103,14 +137,14 @@ public class ServerSSLSocket {
 			public void failed(Throwable exc, Void attachment) {
 				if (exc != null) {
 					// only log if a failure was thrown
-					System.err.println("Failed to connect: " + exc.getMessage());
+					logger.severe("Failed to connect: " + exc.getMessage());
 					controller.socketError("Failed to connect: " + exc.getMessage());
 				} else {
-					System.out.println("Random failed event?");
+					logger.fine("Null error thrown");
 				}
 			}
 		});
-		System.out.println("Ready for clients");
+		logger.info("Ready for clients on port: " + port);
 	}
 
 	/**
@@ -120,17 +154,27 @@ public class ServerSSLSocket {
 	 *            Message to send to clients
 	 */
 	public void writeMessage(Message message) {
-		// TODO: Need to check clearance levels with the clients
-		System.out.println("Writing messages");
-		for (ClientRepresentative client : this.clients) {
-			if (!client.getName().equals(message.senderName)) {
-				// Create the message
-				commonUIElements.MessageProtos.Message msg = commonUIElements.MessageProtos.Message.newBuilder()
-						.setClearance(message.clearance).setMessage(message.message).setName(message.alias)
-						.setSender(message.senderName)
-						.setSignature(SignatureSystem.signMessage(message.message, privateKey)).build();
-				System.out.println("Message size: " + msg.toByteArray().length);
-				client.getSocketChannel().write(ByteBuffer.wrap(msg.toByteArray()));
+		// check the clearance level of the client
+		int i = Integer.parseInt(clientSettings.getProperty(message.senderName));
+		System.out.println(i);
+		if (Integer.parseInt(clientSettings.getProperty(message.senderName)) < message.clearance) {
+			controller.displayMessage(
+					"Error: " + message.senderName + " is not cleared for " + message.clearance + " level messages.");
+		} else {
+			logger.info("Writing message");
+			for (ClientRepresentative client : this.clients) {
+				// do not transmit to client, and make sure each client has the
+				// clearance to receive the message
+				if (!client.getName().equals(message.senderName)
+						&& Integer.parseInt(clientSettings.getProperty(client.getName())) > message.clearance) {
+					logger.fine("Sending message to: " + client.getName());
+					// Create the message, include signature from the server
+					commonUIElements.MessageProtos.Message msg = commonUIElements.MessageProtos.Message.newBuilder()
+							.setClearance(message.clearance).setMessage(message.message).setName(message.alias)
+							.setSender(message.senderName)
+							.setSignature(SignatureSystem.signMessage(message.message, privateKey)).build();
+					client.getSocketChannel().write(ByteBuffer.wrap(msg.toByteArray()));
+				}
 			}
 		}
 	}
@@ -143,23 +187,23 @@ public class ServerSSLSocket {
 		try {
 			connector.close();
 		} catch (IOException e) {
-			System.err.println("Failed to kill server :( " + e.getMessage());
-			controller.socketError("Failed to connect: " + e.getMessage());
+			logger.severe("Failed to kill server: " + e.getMessage());
+			controller.socketError("Failed to kill server: " + e.getMessage());
 		}
-		System.out.println("connector closed");
+		logger.fine("connector closed");
 		msgReader.stop();
 		try {
 			msgThread.interrupt();
-			System.out.println("Waiting on reader to stop");
+			logger.fine("Waiting on msg reader to stop");
 			msgThread.join();
 		} catch (InterruptedException e1) {
-			System.err.println("FUCKIN' THREADS!!!!!");
+			logger.severe("Failed to interrupt message reader thread");
 		}
 		for (ClientRepresentative rep : this.clients) {
 			rep.stop();
 		}
-		System.out.println("Waiting on clients");
 		// clear out clients
 		this.clients.clear();
+		logger.info("ServerSSLSocket has been stopped");
 	}
 }

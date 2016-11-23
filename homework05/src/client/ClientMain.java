@@ -1,8 +1,14 @@
 package client;
 
 import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.util.Arrays;
 import java.util.logging.Logger;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
 
 import commonUIElements.CommandLineArgs;
 import commonUIElements.KeystoreAccessController;
@@ -65,13 +71,18 @@ public class ClientMain extends Application implements KeystoreAccessInterface {
 
 	@Override
 	public void onLoginRequest(final char[] keyStorePassword, final char[] trustStorePassword) {
+		try {
 		// Try to open the keystore
 		KeyStore keyStore = KeyStoreAccessor.getKeyStore(keyStorePassword, parser.getKeystoreLocation());
+		// setup the key management object
+		KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+		kmf.init(keyStore, keyStorePassword);
 		// Try to open the trust store
-				KeyStore trustStore = KeyStoreAccessor.getKeyStore(trustStorePassword, parser.getTrustStoreLocation());
-		// clear out password
-		Arrays.fill(keyStorePassword, ' ');
-		Arrays.fill(trustStorePassword, ' ');
+		KeyStore trustStore = KeyStoreAccessor.getKeyStore(trustStorePassword, parser.getTrustStoreLocation());
+		// setup trust store management object
+		TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+		tmf.init(trustStore);
+
 		if (keyStore == null) {
 			logger.severe("Keystore failed to open at:  \"" + parser.getKeystoreLocation()
 					+ "\" either the keystore does not exist or the password was incorrect");
@@ -85,6 +96,12 @@ public class ClientMain extends Application implements KeystoreAccessInterface {
 		// remove the popup UI
 		this.popupController.getKeystoreAccessStage().close();
 		// setup the client UI
-		this.clientController = new ClientUILayoutController(this.primaryStage, keyStore, trustStore);
+		this.clientController = new ClientUILayoutController(this.primaryStage, keyStore, trustStore, kmf, tmf);
+		} catch(NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException e) {
+			System.err.println("Failed to start up the key management engines: " + e.getMessage());
+		}
+		// clear out password
+		Arrays.fill(keyStorePassword, ' ');
+		Arrays.fill(trustStorePassword, ' ');
 	}
 }
