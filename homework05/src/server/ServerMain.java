@@ -66,7 +66,7 @@ public class ServerMain extends Application implements KeystoreAccessInterface {
 					// set to default parameters
 					settings.setProperty("logFile", "log.xml");
 					settings.setProperty("port", "5280");
-					settings.setProperty("serverAlias", "myKey");
+					settings.setProperty("serverAlias", "server");
 					settings.store(new FileOutputStream(newSettingsFile), null);
 
 				} catch (IOException e2) {

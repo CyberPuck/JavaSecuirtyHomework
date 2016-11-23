@@ -272,7 +272,7 @@ public class ServerUILayoutController implements Initializable, SocketResponseIn
 			if (serverKey == null) {
 				activityMsgArea.setText(
 						activityMsgArea.getText() + "Error: Key password is invalid or the alias is incorrect\n");
-				logger.log(Level.SEVERE, "Error: Key password is invalid or the alias is incorrect\n");
+				logger.log(Level.SEVERE, "Key password is invalid or the alias is incorrect " + settings.getProperty("serverAlias"));
 			} else {
 				// start the server
 				serverSSLSocket.startServer(trustStore, serverKey, kmf, tmf);

@@ -89,21 +89,41 @@ public class SocketReadThread implements Runnable {
 				commonUIElements.MessageProtos.Message msg = commonUIElements.MessageProtos.Message
 						.parseFrom(Arrays.copyOf(buf.array(), bytesRead));
 				System.out.println("RXed: " + msg.toString());
+				if (!msg.getName().equals(name)) {
+					name = msg.getName();
+				}
 				// add data to the message queue
 				if (SignatureSystem.verifySignature(msg.getSignature(), msg.getMessage(), msg.getName(), trustStore)) {
 					messages.put(
 							new Message(msg.getSender(), msg.getMessage(), msg.getSignature(), msg.getClearance()));
 				} else {
-					messages.put(new Message(msg.getSender(), "Error: signture is invalid", msg.getSignature(),
-							msg.getClearance()));
+					Message error = new Message(msg.getSender(), "Error: signture is invalid", msg.getSignature(),
+							msg.getClearance());
+					error.error = true;
+					messages.put(error);
 				}
 				// clear the buffer for the next message
 				buf.clear();
 			} catch (InterruptedException e) {
 				System.err.println("Failed to add message to the queue: " + e.getMessage());
+				Message error = new Message(this.name, "Disconnected", "", 1);
+				error.error = true;
+				try {
+					messages.put(error);
+				} catch (InterruptedException e1) {
+					System.err.println("Thread has an error, can't inform server of this transgression");
+				}
 				break;
 			} catch (TimeoutException e) {
 				System.err.println("Timeout hit, waiting again");
+				Message error = new Message(this.name, "Client: " + this.name + " has timed out", "", 1);
+				error.kill = true;
+				try {
+					messages.put(error);
+				} catch (InterruptedException e1) {
+					System.err.println("Thread has an error, can't inform server of this transgression");
+				}
+				break;
 			} catch (ExecutionException e) {
 				System.err.println("Execution error, breaking out of loop");
 				break;
@@ -119,5 +139,14 @@ public class SocketReadThread implements Runnable {
 			System.err.println("Failed to close socket while exiting");
 		}
 		System.out.println("Exiting thread...");
+	}
+
+	/**
+	 * Gets the name of the client. This might change at first.
+	 * 
+	 * @return name of the client
+	 */
+	public String getName() {
+		return this.name;
 	}
 }

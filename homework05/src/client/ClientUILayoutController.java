@@ -239,6 +239,12 @@ public class ClientUILayoutController implements Initializable, ServerLoginPopup
 		// write out a socket message
 		rxField.setText(
 				rxField.getText() + message.senderName + "@" + message.clearance + ": " + message.message + "\n");
+		if (message.error || message.kill) {
+			this.socket.stop();
+			connected = !connected;
+			// JavaFx threading issue :(
+			// updateButtons();
+		}
 	}
 
 	@Override

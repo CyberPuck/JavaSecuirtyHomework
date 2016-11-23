@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package messages;
+
+option java_package = "commonUIElements";
+option java_outer_classname = "MessageProtos";
+
+// primary message
+message Message {
+	string name = 1;
+	string sender = 2;
+	string message = 3;
+	int32 clearance = 4;
+	string signature = 5;
+}

@@ -16,6 +16,10 @@ public class Message {
 	public String signature;
 	// clearance of the message
 	public int clearance;
+	// indicates if the message is an error
+	public boolean error = false;
+	// indicates the client with the name should be killed
+	public boolean kill = false;
 
 	/**
 	 * Simple message container.

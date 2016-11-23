@@ -125,10 +125,11 @@ public class ServerSSLSocket {
 			@Override
 			public void completed(AsynchronousSocketChannel ch, Void attachment) {
 				logger.info("Client connected");
+				controller.displayMessage("Client Connected");
 				// handle I/O
 				connector.accept(null, this);
 				// create the client
-				ClientRepresentative client = new ClientRepresentative(ch, "client" + clients.size(), messages,
+				ClientRepresentative client = new ClientRepresentative(ch, "client" + (clients.size()+1), messages,
 						trustStore, serverEngine);
 				clients.add(client);
 			}
@@ -154,12 +155,28 @@ public class ServerSSLSocket {
 	 *            Message to send to clients
 	 */
 	public void writeMessage(Message message) {
+		// if the message is an error don't forward to clients
+		if(message.error) {
+			return;
+		}
+		// if the message is a kill order find the client and kill it
+		if(message.kill) {
+			for(ClientRepresentative rep : this.clients) {
+				if(rep.getName().equals(message.alias)) {
+					// stop the client
+					rep.stop();
+					// remove from list
+					this.clients.remove(rep);
+				}
+			}
+		}
 		// check the clearance level of the client
 		int i = Integer.parseInt(clientSettings.getProperty(message.senderName));
 		System.out.println(i);
 		if (Integer.parseInt(clientSettings.getProperty(message.senderName)) < message.clearance) {
 			controller.displayMessage(
 					"Error: " + message.senderName + " is not cleared for " + message.clearance + " level messages.");
+			logger.severe(message.senderName + " is not cleared for " + message.clearance + " level messages.");
 		} else {
 			logger.info("Writing message");
 			for (ClientRepresentative client : this.clients) {

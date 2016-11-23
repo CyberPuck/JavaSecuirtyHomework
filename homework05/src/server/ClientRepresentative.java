@@ -80,7 +80,8 @@ public class ClientRepresentative {
 	 * @return the client name
 	 */
 	public String getName() {
-		return name;
+		this.name = reader.getName();
+		return reader.getName();
 	}
 
 	/**
