@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.ParseException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -33,6 +32,9 @@ public class C14NDemoMain {
 	public static void main(String[] args) {
 		// NOTE: JVM told me to
 		org.apache.xml.security.Init.init();
+		
+		
+		
 		// setup the C14N canonicalizer
 		try {
 			Canonicalizer canon = Canonicalizer.getInstance(Canonicalizer.ALGO_ID_C14N11_OMIT_COMMENTS);
