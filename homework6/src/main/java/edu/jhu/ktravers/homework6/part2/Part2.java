@@ -33,6 +33,7 @@ public class Part2 {
 		if (args.length != 4) {
 			System.err.println("Invalid number of command line arguments!");
 			System.out.println("Usage:  Part2 <order.xml path> <key store path> <keystore password> <key alias>");
+			System.out.println("NOTE:  keystore password MUST match key password");
 			System.exit(1);
 		}
 
@@ -52,7 +53,7 @@ public class Part2 {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(file);
 			// C14N the unsigned file first, NOTE this is code from Part 1
-			// TODO: Use build in C14N?
+			// TODO: Use built-in C14N?
 			
 			// create the signature factory
 			// REMEMBER: DSA is required for signing
