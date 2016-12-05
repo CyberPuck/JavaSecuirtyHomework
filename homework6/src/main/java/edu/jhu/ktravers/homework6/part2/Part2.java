@@ -4,13 +4,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.util.ArrayList;
 
+import javax.xml.crypto.dsig.CanonicalizationMethod;
+import javax.xml.crypto.dsig.DigestMethod;
+import javax.xml.crypto.dsig.Reference;
+import javax.xml.crypto.dsig.SignatureMethod;
+import javax.xml.crypto.dsig.SignedInfo;
+import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
+import javax.xml.crypto.dsig.dom.DOMSignContext;
+import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
+import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.apache.xml.security.c14n.Canonicalizer;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * Handles signing XML files. NOTE All passwords are not cleared during this
@@ -52,14 +62,30 @@ public class Part2 {
 			factory.setNamespaceAware(true);
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(file);
-			// C14N the unsigned file first, NOTE this is code from Part 1
-			// TODO: Use built-in C14N?
-			
+			// test to see if we get the order
+			Node order = doc.getDocumentElement().getElementsByTagName("order").item(0);
+			// create the signature context
+			DOMSignContext dsc = new DOMSignContext(key, doc.getDocumentElement().getElementsByTagName("order").item(0));
 			// create the signature factory
 			// REMEMBER: DSA is required for signing
 			// Cert will be stored in the document
 			XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
-			
+			// SHA1 digest, note SHA1 is being retired after 2016 by most CAs!
+			DigestMethod digestMethod = fac.newDigestMethod(DigestMethod.SHA1, null);
+			C14NMethodParameterSpec spec = null;
+			// java canonicalization defaults to C14N!
+			CanonicalizationMethod cm = fac.newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS,
+					spec);
+			SignatureMethod sm = fac.newSignatureMethod(SignatureMethod.DSA_SHA1, null);
+			ArrayList<Transform> transformList = new ArrayList<Transform>();
+			TransformParameterSpec transformSpec = null;
+			// our signature is enveloped not enveloping
+			Transform envTransform = fac.newTransform(Transform.ENVELOPED, transformSpec);
+			transformList.add(envTransform);
+			Reference ref = fac.newReference("", digestMethod, transformList, null, null);
+			ArrayList<Reference> refList = new ArrayList<Reference>();
+			refList.add(ref);
+			SignedInfo si = fac.newSignedInfo(cm, sm, refList);
 
 		} catch (Exception e) {
 			System.err.println("Failed to read in the XML file: " + e.getMessage());
