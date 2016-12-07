@@ -2,9 +2,14 @@ package edu.jhu.ktravers.homework6.part2;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.xml.crypto.dsig.CanonicalizationMethod;
 import javax.xml.crypto.dsig.DigestMethod;
@@ -12,15 +17,24 @@ import javax.xml.crypto.dsig.Reference;
 import javax.xml.crypto.dsig.SignatureMethod;
 import javax.xml.crypto.dsig.SignedInfo;
 import javax.xml.crypto.dsig.Transform;
+import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMSignContext;
+import javax.xml.crypto.dsig.keyinfo.KeyInfo;
+import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
+import javax.xml.crypto.dsig.keyinfo.X509Data;
 import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * Handles signing XML files. NOTE All passwords are not cleared during this
@@ -55,7 +69,11 @@ public class Part2 {
 			// Unlock key store
 			KeyStore ks = KeyStore.getInstance("JKS");
 			ks.load(new FileInputStream(keyStore), password.toCharArray());
+			// load the private key
 			PrivateKey key = (PrivateKey) ks.getKey(alias, password.toCharArray());
+			// load the certificate
+			X509Certificate c = (X509Certificate)ks.getCertificate(alias);
+			Certificate cert = ks.getCertificate(alias);
 			// read in the XML file and parse it
 			File file = new File(path);
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -63,9 +81,9 @@ public class Part2 {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(file);
 			// test to see if we get the order
-			Node order = doc.getDocumentElement().getElementsByTagName("order").item(0);
+//			Node order = doc.getDocumentElement().getElementsByTagName("order").item(0);
 			// create the signature context
-			DOMSignContext dsc = new DOMSignContext(key, doc.getDocumentElement().getElementsByTagName("order").item(0));
+//			DOMSignContext dsc = new DOMSignContext(key, doc.getDocumentElement().getElementsByTagName("order").item(0));
 			// create the signature factory
 			// REMEMBER: DSA is required for signing
 			// Cert will be stored in the document
@@ -85,7 +103,30 @@ public class Part2 {
 			Reference ref = fac.newReference("", digestMethod, transformList, null, null);
 			ArrayList<Reference> refList = new ArrayList<Reference>();
 			refList.add(ref);
-			SignedInfo si = fac.newSignedInfo(cm, sm, refList);
+//			SignedInfo si = fac.newSignedInfo(cm, sm, refList);
+			// root of DOM
+			NodeList list = doc.getDocumentElement().getElementsByTagName("Order");
+			Node test = list.item(0);
+//			DOMSignContext dom = new DOMSignContext(key, doc.getDocumentElement());
+			DOMSignContext dom = new DOMSignContext(key, test);
+			SignedInfo si2 = fac.newSignedInfo(cm, sm, refList);
+			// add public key cert to XML
+			KeyInfoFactory kif = fac.getKeyInfoFactory();
+			List x509Shit = new ArrayList<>();
+			x509Shit.add(c.getSubjectX500Principal().getName());
+			x509Shit.add(c);
+			X509Data xd = kif.newX509Data(x509Shit);
+			KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
+			// add both to the XML signature
+			XMLSignature signature = fac.newXMLSignature(si2, ki);
+			signature.sign(dom);
+			
+			// write to signedOrder.xml
+			FileOutputStream fos = new FileOutputStream("signedOrder.xml");
+			// create transformer to write out file
+			TransformerFactory tf = TransformerFactory.newInstance();
+			Transformer trans = tf.newTransformer();
+			trans.transform(new DOMSource(doc), new StreamResult(fos));
 
 		} catch (Exception e) {
 			System.err.println("Failed to read in the XML file: " + e.getMessage());
