@@ -72,7 +72,7 @@ public class Part2 {
 			// load the private key
 			PrivateKey key = (PrivateKey) ks.getKey(alias, password.toCharArray());
 			// load the certificate
-			X509Certificate c = (X509Certificate)ks.getCertificate(alias);
+			X509Certificate c = (X509Certificate) ks.getCertificate(alias);
 			Certificate cert = ks.getCertificate(alias);
 			// read in the XML file and parse it
 			File file = new File(path);
@@ -81,9 +81,11 @@ public class Part2 {
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(file);
 			// test to see if we get the order
-//			Node order = doc.getDocumentElement().getElementsByTagName("order").item(0);
+			// Node order =
+			// doc.getDocumentElement().getElementsByTagName("order").item(0);
 			// create the signature context
-//			DOMSignContext dsc = new DOMSignContext(key, doc.getDocumentElement().getElementsByTagName("order").item(0));
+			// DOMSignContext dsc = new DOMSignContext(key,
+			// doc.getDocumentElement().getElementsByTagName("order").item(0));
 			// create the signature factory
 			// REMEMBER: DSA is required for signing
 			// Cert will be stored in the document
@@ -103,12 +105,18 @@ public class Part2 {
 			Reference ref = fac.newReference("", digestMethod, transformList, null, null);
 			ArrayList<Reference> refList = new ArrayList<Reference>();
 			refList.add(ref);
-//			SignedInfo si = fac.newSignedInfo(cm, sm, refList);
-			// root of DOM
+			// SignedInfo si = fac.newSignedInfo(cm, sm, refList);
+			// Get the Order to sign
 			NodeList list = doc.getDocumentElement().getElementsByTagName("Order");
 			Node test = list.item(0);
-//			DOMSignContext dom = new DOMSignContext(key, doc.getDocumentElement());
+			// DOMSignContext dom = new DOMSignContext(key,
+			// doc.getDocumentElement());
 			DOMSignContext dom = new DOMSignContext(key, test);
+			// Get the Commission to sign
+			NodeList list2 = doc.getDocumentElement().getElementsByTagName("Commission");
+			Node test2 = list2.item(0);
+			DOMSignContext dom2 = new DOMSignContext(key, test2);
+
 			SignedInfo si2 = fac.newSignedInfo(cm, sm, refList);
 			// add public key cert to XML
 			KeyInfoFactory kif = fac.getKeyInfoFactory();
@@ -119,8 +127,12 @@ public class Part2 {
 			KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
 			// add both to the XML signature
 			XMLSignature signature = fac.newXMLSignature(si2, ki);
+			// sign Commission
+			signature.sign(dom2);
+
+			// sign Order
 			signature.sign(dom);
-			
+
 			// write to signedOrder.xml
 			FileOutputStream fos = new FileOutputStream("signedOrder.xml");
 			// create transformer to write out file
