@@ -47,6 +47,8 @@ public class C14NDemoMain {
 					String plainText = new String(result);
 					System.out.println(uncanonicalized);
 					System.out.println("+++++++++++++++++++++++++++++++");
+					System.out.println("    C14N Applied");
+					System.out.println("+++++++++++++++++++++++++++++++");
 					System.out.println(plainText);
 				} catch(FileNotFoundException e) {
 					System.err.println("Failed to read file: " + path + " because: " + e.getMessage());
