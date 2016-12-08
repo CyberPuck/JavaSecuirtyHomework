@@ -2,11 +2,11 @@
 	<Quota>500000</Quota >
 	<Order  					 id="1234">
 		<Item id="77484" dom="12Nov2002">F-16 Jet Fighter</Item    >
-		<Color/>
+		<Color>                </Color>
 		<Quantity     >1</Quantity>
 		<Person id="fred"></Person>
 		<Person id="fred"/>
 		<Amount>8200000</Amount>
-		<Commission manager="ted" runningMan="Arnold" id="55">10000</Commission>
+		<Commission runningMan="Arnold" manager="ted"  id="55">10000</Commission>
 	</Order   >
 </SalesPerson>
