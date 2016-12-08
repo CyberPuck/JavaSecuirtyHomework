@@ -45,6 +45,9 @@ public class C14NDemoMain {
 					String uncanonicalized = new String(data);
 					byte[] result = canon.canonicalize(data);
 					String plainText = new String(result);
+					System.out.println("+++++++++++++++++++++++++++++++");
+					System.out.println("    Before C14N");
+					System.out.println("+++++++++++++++++++++++++++++++");
 					System.out.println(uncanonicalized);
 					System.out.println("+++++++++++++++++++++++++++++++");
 					System.out.println("    C14N Applied");
