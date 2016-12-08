@@ -1,4 +1,4 @@
-package edu.jhu.ktravers.homework6.part1;
+package part1;
 
 import java.io.BufferedReader;
 import java.io.File;

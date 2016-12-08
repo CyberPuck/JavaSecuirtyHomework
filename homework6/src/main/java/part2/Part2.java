@@ -1,4 +1,4 @@
-package edu.jhu.ktravers.homework6.part2;
+package part2;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,6 +20,7 @@ import javax.xml.crypto.dsig.Transform;
 import javax.xml.crypto.dsig.XMLSignature;
 import javax.xml.crypto.dsig.XMLSignatureFactory;
 import javax.xml.crypto.dsig.dom.DOMSignContext;
+import javax.xml.crypto.dsig.dom.DOMValidateContext;
 import javax.xml.crypto.dsig.keyinfo.KeyInfo;
 import javax.xml.crypto.dsig.keyinfo.KeyInfoFactory;
 import javax.xml.crypto.dsig.keyinfo.X509Data;
@@ -27,6 +28,7 @@ import javax.xml.crypto.dsig.spec.C14NMethodParameterSpec;
 import javax.xml.crypto.dsig.spec.TransformParameterSpec;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -43,7 +45,7 @@ import org.w3c.dom.NodeList;
  * @author Kyle
  */
 public class Part2 {
-
+	
 	/**
 	 * Program entry point for signing XML files.
 	 * 
@@ -73,7 +75,7 @@ public class Part2 {
 			PrivateKey key = (PrivateKey) ks.getKey(alias, password.toCharArray());
 			// load the certificate
 			X509Certificate c = (X509Certificate) ks.getCertificate(alias);
-			Certificate cert = ks.getCertificate(alias);
+//			Certificate cert = ks.getCertificate(alias);
 			// read in the XML file and parse it
 			File file = new File(path);
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -138,7 +140,34 @@ public class Part2 {
 			// create transformer to write out file
 			TransformerFactory tf = TransformerFactory.newInstance();
 			Transformer trans = tf.newTransformer();
-			trans.transform(new DOMSource(doc), new StreamResult(fos));
+			// make the output more readable
+			trans.setOutputProperty(OutputKeys.INDENT, "yes");
+			trans.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+			trans.transform(new DOMSource(doc), new StreamResult(System.out));
+//			trans.transform(new DOMSource(doc), new StreamResult(fos));
+			
+			// +++++++++++++++++++++++++++++++++++++++
+			// run a quick verification test here
+			// +++++++++++++++++++++++++++++++++++++++
+			
+			// Find Signature element.
+			NodeList nl =
+			    doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+			if (nl.getLength() == 0) {
+			    throw new Exception("Cannot find Signature element");
+			}
+
+			// Create a DOMValidateContext and specify a KeySelector
+			// and document context.
+			DOMValidateContext valContext = new DOMValidateContext
+			    (new X509KeySelector(), nl.item(0));
+
+			// Unmarshal the XMLSignature.
+			XMLSignature signature3 = fac.unmarshalXMLSignature(valContext);
+
+			// Validate the XMLSignature.
+			boolean coreValidity = signature3.validate(valContext);
+			System.out.println("Valid? " + coreValidity);
 
 		} catch (Exception e) {
 			System.err.println("Failed to read in the XML file: " + e.getMessage());
