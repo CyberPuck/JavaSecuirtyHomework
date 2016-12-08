@@ -6,6 +6,7 @@ import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.crypto.dsig.CanonicalizationMethod;
@@ -51,7 +52,7 @@ public class OrderSignerVerifier {
 	 *            CLI input
 	 */
 	public static void main(String[] args) {
-		if (args.length != 5 || args.length != 2) {
+		if (args.length != 5 && args.length != 2) {
 			System.err.println("Invalid number of command line arguments!");
 			System.out.println(
 					"Usage:  OrderSignerVerifier s <order.xml path> <key store path> <keystore password> <key alias>");
@@ -65,8 +66,8 @@ public class OrderSignerVerifier {
 		String flag = args[i++];
 		String path = args[i++];
 		// verify order.xml is in path
-		if (path.contains("order.xml") || path.contains("signedOrder.xml")) {
-			System.err.println("Alert! Must input /'order.xml' in path: " + path);
+		if (!path.contains("order.xml") && !path.contains("signedOrder.xml")) {
+			System.err.println("Alert! Must input 'order.xml' or signedOrder.xml in path: " + path);
 			System.exit(1);
 		}
 		// decide to verify or sign
@@ -81,7 +82,7 @@ public class OrderSignerVerifier {
 		} else {
 			// verify
 			System.out.println("Verifying signedOrder.xml");
-			if(verifySignature(path)) {
+			if (verifySignature(path)) {
 				System.out.println("signedOrder.xml if verified!");
 			} else {
 				System.out.println("signedOrder.xml has invalid signatures; reject it!");
@@ -123,6 +124,9 @@ public class OrderSignerVerifier {
 		if (signDocument(doc, fac, key, certificate)) {
 			// print out the signed document on a successful signature
 			printXmlDoc(doc);
+			System.out.println("signedOrder.xml has been created");
+		} else {
+			System.err.println("Failed to sign " + path);
 		}
 	}
 
@@ -229,7 +233,7 @@ public class OrderSignerVerifier {
 			// setup the XML signature factory
 			XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
 			Document doc = readInXMLDoc(path);
-			if(doc == null) {
+			if (doc == null) {
 				System.exit(1);
 			}
 			// Find Signature element.
@@ -241,13 +245,29 @@ public class OrderSignerVerifier {
 
 			// Create a DOMValidateContext and specify a KeySelector
 			// and document context.
-			DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(0));
+			DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(1));
 
-			// Unmarshal the XMLSignature.
-			XMLSignature signature3 = fac.unmarshalXMLSignature(valContext);
+			// Unmarshal the XMLSignature, for verifier
+			XMLSignature signatureVerifier = fac.unmarshalXMLSignature(valContext);
 
 			// Validate the XMLSignature.
-			return signature3.validate(valContext);
+			if (!signatureVerifier.validate(valContext)) {
+
+				// Check core validation status.
+				System.err.println("Signature failed core validation");
+				boolean sv = signatureVerifier.getSignatureValue().validate(valContext);
+				System.out.println("signature validation status: " + sv);
+				if (sv == false) {
+					// Check the validation status of each Reference.
+					Iterator i = signatureVerifier.getSignedInfo().getReferences().iterator();
+					for (int j = 0; i.hasNext(); j++) {
+						boolean refValid = ((Reference) i.next()).validate(valContext);
+						System.out.println("ref[" + j + "] validity status: " + refValid);
+					}
+				}
+			} else {
+				return true;
+			}
 		} catch (Exception e) {
 			System.err.println("Verification error: " + e.getMessage());
 		}
