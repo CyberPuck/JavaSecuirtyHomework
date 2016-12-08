@@ -82,7 +82,11 @@ public class OrderSignerVerifier {
 		} else {
 			// verify
 			System.out.println("Verifying signedOrder.xml");
-			if (verifySignature(path)) {
+			Document doc = readInXMLDoc(path);
+			if (doc == null) {
+				System.exit(1);
+			}
+			if (verifySignature(doc)) {
 				System.out.println("signedOrder.xml if verified!");
 			} else {
 				System.out.println("signedOrder.xml has invalid signatures; reject it!");
@@ -172,7 +176,7 @@ public class OrderSignerVerifier {
 			DigestMethod digestMethod = fac.newDigestMethod(DigestMethod.SHA1, null);
 			C14NMethodParameterSpec spec = null;
 			// java canonicalization defaults to C14N!
-			CanonicalizationMethod cm = fac.newCanonicalizationMethod(CanonicalizationMethod.EXCLUSIVE_WITH_COMMENTS,
+			CanonicalizationMethod cm = fac.newCanonicalizationMethod(CanonicalizationMethod.INCLUSIVE,
 					spec);
 			// signature is SHA1, highest Java will go for now
 			SignatureMethod sm = fac.newSignatureMethod(SignatureMethod.DSA_SHA1, null);
@@ -228,32 +232,29 @@ public class OrderSignerVerifier {
 	 *            signature factory for getting signature data
 	 * @return flag indicating if the signature is valid
 	 */
-	public static boolean verifySignature(String path) {
+	public static boolean verifySignature(Document doc) {
 		try {
 			// setup the XML signature factory
 			XMLSignatureFactory fac = XMLSignatureFactory.getInstance("DOM");
-			Document doc = readInXMLDoc(path);
-			if (doc == null) {
-				System.exit(1);
-			}
-			// Find Signature element.
+			
+			// Find Signature element, is this broken?
 			NodeList nl = doc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
 			if (nl.getLength() == 0) {
 				System.err.println("Cannot find Signature element");
 				return false;
 			}
 
-			// Create a DOMValidateContext and specify a KeySelector
-			// and document context.
-			DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(1));
+			// Test the Commission signature
+			DOMValidateContext valContext = new DOMValidateContext(new X509KeySelector(), nl.item(0));
 
 			// Unmarshal the XMLSignature, for verifier
 			XMLSignature signatureVerifier = fac.unmarshalXMLSignature(valContext);
+			signatureVerifier.getSignatureValue();
 
 			// Validate the XMLSignature.
 			if (!signatureVerifier.validate(valContext)) {
 
-				// Check core validation status.
+				// Verbose error printing
 				System.err.println("Signature failed core validation");
 				boolean sv = signatureVerifier.getSignatureValue().validate(valContext);
 				System.out.println("signature validation status: " + sv);
@@ -265,7 +266,19 @@ public class OrderSignerVerifier {
 						System.out.println("ref[" + j + "] validity status: " + refValid);
 					}
 				}
+				return false;
 			} else {
+				// Test the Order signature
+				DOMValidateContext valContextOrder = new DOMValidateContext(new X509KeySelector(), nl.item(0));
+
+				// Unmarshal the XMLSignature, for verifier
+				XMLSignature signatureVerifierOrder = fac.unmarshalXMLSignature(valContextOrder);
+				signatureVerifierOrder.getSignatureValue();
+
+				// Validate the XMLSignature.
+				if (!signatureVerifierOrder.validate(valContextOrder)) {
+					return false;
+				}
 				return true;
 			}
 		} catch (Exception e) {
